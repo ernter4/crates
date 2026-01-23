@@ -6,11 +6,20 @@ from sqlmodel import select
 from app.accounting.models import Invoice
 from app.shared.database import SessionDep
 router = APIRouter()
+
+@ router.post("/")
+def create_invoice( invoice: Invoice, session: SessionDep) -> Invoice:
+
+    session.add(invoice)
+    session.commit()
+    session.refresh(invoice)
+    return invoice
+
 @router.get("/{invoice_id}")
 def read_invoice_by_id( customer_id: int, session: SessionDep )-> Invoice| None:
     return session.get(Invoice, customer_id)
 @router.get("/")
-def read_invoices( billing_date_gte:date,customer_id: int,session: SessionDep) -> List[Invoice]:
+def read_invoices(session: SessionDep, billing_date_gte:date = None,customer_id: int = None) -> List[Invoice]:
     query = select(Invoice)
     if customer_id:
         query = query.where(Invoice.customer_id == customer_id)
@@ -18,12 +27,7 @@ def read_invoices( billing_date_gte:date,customer_id: int,session: SessionDep) -
         query = query.where(Invoice.billing_date >= billing_date_gte)
     results = session.exec(query).all()
     return results
-@ router.post("/")
-def create_invoice( invoice: Invoice, session: SessionDep) -> Invoice:
-    session.add(invoice)
-    session.commit()
-    session.refresh(invoice)
-    return invoice
+
 @ router.put("/{invoice_id}")
 def update_invoice( invoice_id: int, updated_invoice: Invoice, session: SessionDep) -> Invoice:
     invoice = session.get(Invoice, invoice_id)
