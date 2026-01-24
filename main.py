@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import FastAPI
 from dotenv import load_dotenv
 import uvicorn
@@ -7,6 +9,11 @@ from app.accounting.routers.router import router as accounting_router
 app = FastAPI()
 
 app.include_router(accounting_router, prefix="/accounting", tags=["accounting"])
+
+logging.basicConfig(level=logging.INFO,
+                    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+
+
 if __name__ == "__main__":
 
     # Use manual server startup for debugging compatibility
