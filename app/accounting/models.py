@@ -52,14 +52,14 @@ class BaseInvoice(SQLModel, table=False):
                              ondelete="RESTRICT",index=True)
     invoice_number: int
     billing_date: date
-    amount: Decimal = Field(default=0, max_digits=5, decimal_places=3)
+    amount: Decimal = Field(default=0, max_digits=8, decimal_places=2)
     exported_at : datetime | None = None
 
 
 class Invoice(BaseInvoice, table=True):
     id: int = Field(default=None, primary_key=True)
     customer: "Customer" = Relationship(back_populates="invoices")
-    #items: List["InvoiceItem"] = Relationship(back_populates="invoice")
+    items: List["InvoiceItem"] = Relationship(back_populates="invoice")
 
 class CreateInvoice(BaseInvoice):
     pass
@@ -69,12 +69,11 @@ class PublicInvoice(BaseInvoice):
 
 
 class BaseInvoiceItem(SQLModel, table=False):
-    pass
-    #invoice_id: int = Field(foreign_key="invoice.id" , index=True)
+   invoice_id: int = Field(foreign_key="invoice.id" , index=True)
 
 class InvoiceItem(BaseInvoiceItem, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    #invoice: "Invoice" = Relationship(back_populates="items")
+    invoice: "Invoice" = Relationship(back_populates="items")
 class CreateInvoiceItem(BaseInvoiceItem):
     pass
 
@@ -84,7 +83,7 @@ class BaseAccountingExport(SQLModel, table=False):
     end_date: date
 
 class AccountingExport(BaseAccountingExport, table=True):
-    export_date: datetime
+    created_at: datetime
     id: int = Field(default=None, primary_key=True)
     SepaStatement: "SepaStatement" = Relationship(back_populates="export")
 class CreateAccountingExport(BaseAccountingExport):

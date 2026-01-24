@@ -29,14 +29,15 @@ class ExportService:
                 "name": f"{invoice.customer.first_name} {invoice.customer.last_name}",
                 "IBAN": invoice.customer.iban,
                 "BIC": invoice.customer.bic,
-                "amount": invoice.amount*100,
+                "amount": int(invoice.amount*100),
                 "type": "RCUR",
-                "collection_date": datetime.date.today(),
+                "collection_date": date.today(),
                 "mandate_id": invoice.customer.sepa_mandate_reference,
-                "mandate_date": datetime.date.today(),
+                "mandate_date": date.today(),
                 "description": f"Essen ausser Haus im Monat {invoice.billing_date.strftime('%B %Y')} - Rechnung Nr. {invoice.invoice_number}"}
             sepa.add_payment(payment)
-        sepa_db = SepaStatement(export_id = export_id, sepa_xml = sepa.export(validate=True))
+
+        sepa_db = SepaStatement(export_id = export_id, content = str(sepa.export(validate=True)))
         update_database(sepa_db,self.session)
 
 

@@ -11,9 +11,9 @@ def update_database(model_instance:SQLModel, session: Session):
         session.add(model_instance)
         session.commit()
         session.refresh(model_instance)
-    except Exception:
+    except Exception as e:
         session.rollback()
-        logger.error("Error in database :")
+        logger.error(f"Error in database :{e}")
         raise HTTPException(status_code=400, detail=f"Database operation failed for { model_instance.__class__.__name__}")
     return model_instance
 
