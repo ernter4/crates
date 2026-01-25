@@ -20,7 +20,7 @@ class BaseCustomer(SQLModel):
     @field_validator('sepa_mandate_reference', mode='before')
     def generate_sepa_mandate_reference(cls, v, info):
         if v is None and info.data.get('sepa_mandate' ) is True:
-            return f"{info.data.get('last_name')}_{info.data.get('first_name')}"
+            return f"{info.data.get('last_name')},{info.data.get('first_name')}"
         return v
 
     @field_validator('sepa_mandate_date', mode='before')
@@ -85,17 +85,9 @@ class BaseAccountingExport(SQLModel, table=False):
 class AccountingExport(BaseAccountingExport, table=True):
     created_at: datetime
     id: int = Field(default=None, primary_key=True)
-    SepaStatement: "SepaStatement" = Relationship(back_populates="export")
+    sepa_xml: str | None = None
 class CreateAccountingExport(BaseAccountingExport):
     pass
 
 
 
-class SepaStatement(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    export_id : int = Field(foreign_key="accountingexport.id",
-                            sa_column_kwargs={
-                                "name": "fk_sepastatement_accountingexport"},
-                            ondelete="RESTRICT", index=True)
-    export : "AccountingExport" = Relationship(back_populates="SepaStatement")
-    content: str
