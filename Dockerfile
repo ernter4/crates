@@ -6,13 +6,14 @@ ENV PYTHONUNBUFFERED=1
 
 # set work directory
 WORKDIR /app
+# copy working dir
+COPY . .
 
 # update pip, install dependencies
 RUN pip install --upgrade pip
-COPY . .
+
 RUN pip install -r requirements.txt
 
-# copy app folder
-
+#run alembic and fastapi
 
 CMD alembic upgrade head && fastapi run main.py
