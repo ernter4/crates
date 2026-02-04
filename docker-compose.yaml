@@ -9,3 +9,4 @@ services:
     ports:
       - "8000:8000"
     restart: "always"
+    user: 1000:1000
