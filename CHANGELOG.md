@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/ernter4/crates/compare/v0.1.1...v0.2.0) (2026-02-04)
+
+
+### Features
+
+* added build pipline ([d04530e](https://github.com/ernter4/crates/commit/d04530edc591b665b36d7351b04a5ea7837cbf97))
+
 ## [0.1.1](https://github.com/ernter4/crates/compare/v0.1.0...v0.1.1) (2026-02-04)
 
 
