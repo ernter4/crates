@@ -5,7 +5,7 @@ on:
     tags:
       - 'v*.*.*'
 env:
-  REGISTRY_IMAGE: ghcr.io/ernter4/g1_server
+  REGISTRY_IMAGE: ghcr.io/ernter4/crates
 jobs:
   publish:
     runs-on: ubuntu-latest
