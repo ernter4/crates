@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.3](https://github.com/ernter4/crates/compare/v0.2.2...v0.2.3) (2026-02-04)
+
+
+### Bug Fixes
+
+* changed .gitignore ([3a48de7](https://github.com/ernter4/crates/commit/3a48de76a66d3d810035f90f6d34ebccf934302d))
+
 ## [0.2.2](https://github.com/ernter4/crates/compare/v0.2.1...v0.2.2) (2026-02-04)
 
 
