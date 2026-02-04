@@ -1,0 +1,11 @@
+# Defining the compose version
+services:
+  crates:
+    build:
+      dockerfile: ./Dockerfile
+    volumes:
+      - ./data:/app/data
+    env_file: ./.env
+    ports:
+      - "8000:8000"
+    restart: "always"
