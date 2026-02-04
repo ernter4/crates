@@ -5,7 +5,7 @@ from sqlmodel import create_engine, Session
 
 # Engine wird EINMAL beim Import erstellt
 engine = create_engine(
-    os.getenv("DATABASE_URL"),
+    os.getenv("CRATES_DATABASE_URL"),
     connect_args={"check_same_thread": False,
                   },
     echo=False
