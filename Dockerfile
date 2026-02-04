@@ -15,7 +15,6 @@ RUN pip install --upgrade pip
 
 RUN pip install -r requirements.txt
 
-
 #run alembic and fastapi
 USER 1000:1000
 CMD alembic upgrade head && fastapi run main.py
