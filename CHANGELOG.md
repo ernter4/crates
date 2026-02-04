@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.4](https://github.com/ernter4/crates/compare/v0.2.3...v0.2.4) (2026-02-04)
+
+
+### Bug Fixes
+
+* test release ([29ce7f8](https://github.com/ernter4/crates/commit/29ce7f860e09ed82cb67323393592837b8be8dd2))
+
 ## [0.2.3](https://github.com/ernter4/crates/compare/v0.2.2...v0.2.3) (2026-02-04)
 
 
