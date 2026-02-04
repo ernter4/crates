@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 @router.post("/")
 def create_customer(customer: CreateCustomer, session: SessionDep) -> Customer:
+    """Create a new customer"""
     if customer.customer_number is None:
         max_number = session.exec(select(func.max(Customer.customer_number))).first()
         customer.customer_number = (max_number or 0) + 1
