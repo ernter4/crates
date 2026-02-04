@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/ernter4/crates/compare/v0.2.1...v0.2.2) (2026-02-04)
+
+
+### Bug Fixes
+
+* added permissions ([ecccdf0](https://github.com/ernter4/crates/commit/ecccdf018bae109d4fbb8ae7903b3d1e0f064fec))
+
 ## [0.2.1](https://github.com/ernter4/crates/compare/v0.2.0...v0.2.1) (2026-02-04)
 
 
