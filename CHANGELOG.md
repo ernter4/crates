@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/ernter4/crates/compare/v0.2.0...v0.2.1) (2026-02-04)
+
+
+### Bug Fixes
+
+* fixed coments dockerfile ([a7799c3](https://github.com/ernter4/crates/commit/a7799c3018a9ac2dcb6be9b1c1792b0e6d298731))
+
 ## [0.2.0](https://github.com/ernter4/crates/compare/v0.1.1...v0.2.0) (2026-02-04)
 
 
