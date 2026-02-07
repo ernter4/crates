@@ -3,7 +3,7 @@ import datetime
 
 import requests
 from markdown_it.presets import gfm_like
-billing_date ='2025-12-31'
+billing_date ='2026-01-31'
 with open ('sepa.csv')as csvfile :
     reader = csv.reader(csvfile,delimiter=';')
     for row in reader:
@@ -29,4 +29,7 @@ with open ('sepa.csv')as csvfile :
         "start_date": billing_date,
         "end_date": billing_date
     })
-    print(response.json())
+    xml_response=response.json()
+    with open("sepa.xml",'w') as sepa:
+        sepa.write(xml_response['sepa_xml'])
+
