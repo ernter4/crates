@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/ernter4/crates/compare/v0.2.4...v0.3.0) (2026-02-07)
+
+
+### Features
+
+* added auth ([6ac01da](https://github.com/ernter4/crates/commit/6ac01daab0d0669b58061e56504a58311bc0af9b))
+
 ## [0.2.4](https://github.com/ernter4/crates/compare/v0.2.3...v0.2.4) (2026-02-04)
 
 
