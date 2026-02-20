@@ -5,9 +5,9 @@ from fastapi import Header, HTTPException, Depends
 from app.shared.models import User
 
 
-def get_current_user(    username:Annotated[str, Header( alias="Remote-User")],
+def get_current_user(    username:Annotated[str, Header( alias="Remote-User",include_in_schema=False) ],
 
-                         groups:Annotated[str, Header(alias="Remote-Groups")]) -> User:
+                         groups:Annotated[str, Header(alias="Remote-Groups",include_in_schema=False)  ]) -> User:
 
     return User(
         username=username,

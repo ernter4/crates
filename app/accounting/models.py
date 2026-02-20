@@ -12,6 +12,7 @@ class BaseCustomer(SQLModel):
     last_name: str | None = None
     customer_number:int
     email:  EmailStr | None = None
+    display_text: str|None = None
     sepa_mandate: bool = False
     sepa_mandate_reference: str | None = None
     sepa_mandate_date: date | None = None
@@ -38,6 +39,7 @@ class Customer(BaseCustomer, table=True):
     id: int = Field(default=None, primary_key=True)
     invoices: List["Invoice"] = Relationship(back_populates="customer")
     customer_number :int
+
 class CreateCustomer(BaseCustomer):
     customer_number: int | None = None
     sepa_mandate: bool |None = False

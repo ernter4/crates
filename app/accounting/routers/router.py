@@ -10,7 +10,6 @@ from app.shared.dependencies import  CurrentUserDep
 def auth(user:CurrentUserDep):
     return authorize(["admin"],user)
 router = APIRouter(
-
     dependencies=[Depends(auth)]
 )
 router.include_router(customers_router, prefix="/customer")
