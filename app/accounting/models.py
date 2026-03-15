@@ -1,10 +1,13 @@
 from decimal import Decimal
 from datetime import date, datetime
-from typing import Optional, List
+from typing import Optional, List, TYPE_CHECKING
 from pydantic import EmailStr, field_validator
 from schwifty import IBAN, BIC
 
 from sqlmodel import SQLModel, Field, Relationship
+
+if TYPE_CHECKING:
+    from app.ordering.models import Order
 
 
 class BaseCustomer(SQLModel):
@@ -39,6 +42,7 @@ class Customer(BaseCustomer, table=True):
     id: int = Field(default=None, primary_key=True)
     invoices: List["Invoice"] = Relationship(back_populates="customer")
     customer_number :int
+    orders: List["Order"] = Relationship(back_populates="customer")
 
 class CreateCustomer(BaseCustomer):
     customer_number: int | None = None

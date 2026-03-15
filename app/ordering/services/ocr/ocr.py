@@ -1,38 +1,31 @@
 import datetime
+import io
 import re
-import threading
 from concurrent.futures import ThreadPoolExecutor
 from typing import Optional
-import io
 import numpy as np
 from PIL import Image, ImageEnhance, ImageFilter, ImageColor, ImageDraw
-from google.cloud import vision
+from fastapi.responses import Response
 from google.cloud.vision_v1 import TextAnnotation
 from matplotlib.patches import Polygon
 from numpy._core.strings import isnumeric
-from sqlalchemy import Select
-from sqlmodel import Session, SQLModel
+
+from sqlmodel import Session,select
 
 
 from app.accounting.models import Customer
-from app.ordering.models import CrateRecord
+from app.ordering.models import CrateRecord, Crate
+
 from app.ordering.services.ocr.vision import send_to_google
 
 class OCR:
-    def __init__(self):
-        self.image:Optional[Image] = None
+    def __init__(self,session,image):
+        self.image:Image = image
         self.preprocessed_image:Optional[Image] = None
         self.text_annotations: list[TextAnnotation] = []
         self.box_annotations: list[TextAnnotation] = []
-        self.session:Optional[Session] = None
+        self.session:Session= session
         self.records:list[CrateRecord]= []
-
-    def set_image(self,image:Image):
-        self.image = image
-
-    def set_session(self,session:Session):
-        self.session = session
-
     def preprocess_image(self):
         """
         Vorverarbeitung des Bildes:
@@ -132,11 +125,15 @@ class OCR:
         return shape
 
     def interpret_crate(self,box:TextAnnotation) :
-        record = CrateRecord(crate_id=int(box.description))
+        crate  = self.session.get(Crate,int(box.description))
+        if crate:
+            record = CrateRecord(crate=crate)
+        else :
+            return
         record.shapes.append(self.get_shape(box))
         polygon = self.get_search_polygon(box)
 
-        statement = Select(Customer)
+        statement = select(Customer)
 
         for textblock in self.text_annotations:
             if self.is_in_polygon(polygon, textblock):
@@ -147,7 +144,7 @@ class OCR:
                     statement = statement.where(Customer.display_text.like(f"%{textblock.description}%"))
 
         customers =self.session.exec(statement).fetchall()
-        if len(customers)==1 and record.menu_id is not None:
+        if len(customers)==1:
             record.customer = customers[0]
             record.shapes.append(self.get_bounding_poly(record.shapes))
         self.records.append(record)
@@ -155,7 +152,7 @@ class OCR:
     def draw_record(self,crate_id:int,color:ImageColor) -> None:
         found_record:CrateRecord
         for search_record in self.records:
-            if search_record.crate_id == crate_id:
+            if search_record.crate.id == crate_id:
                 found_record= search_record
                 break
         drw = ImageDraw.Draw(self.image, 'RGBA')
@@ -188,7 +185,12 @@ class OCR:
 
         return polygon
 
-
+    def get_image_response(self):
+        # PNG-Format encodieren
+        buffer = io.BytesIO()
+        self.image.save(buffer, format='PNG')
+        buffer.seek(0)
+        return Response(content=buffer.getvalue(), media_type="image/png")
     def process_image(self):
         self.run_ocr()
         for crate in self.box_annotations:

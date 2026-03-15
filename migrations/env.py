@@ -6,8 +6,7 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
-from app.accounting.models import *
-
+from app.models import *
 # Load environment variables
 load_dotenv()
 
@@ -16,7 +15,7 @@ load_dotenv()
 config = context.config
 
 # Override sqlalchemy.url with environment variable
-config.set_main_option("sqlalchemy.url", os.getenv("DATABASE_URL", "sqlite:///./crates.db"))
+config.set_main_option("sqlalchemy.url", os.getenv("CRATES_DATABASE_URL", "sqlite:///./crates.db"))
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

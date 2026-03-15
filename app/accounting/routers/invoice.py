@@ -16,8 +16,8 @@ def create_invoice( invoice: BaseInvoice, session: SessionDep) -> Invoice:
     return update_database(invoice_db, session)
 
 @router.get("/{invoice_id}")
-def read_invoice_by_id( customer_id: int, session: SessionDep )-> Invoice| None:
-    return session.get(Invoice, customer_id)
+def read_invoice_by_id( invoice_id: int, session: SessionDep )-> Invoice| None:
+    return session.get(Invoice, invoice_id)
 @router.get("/")
 def read_invoices(session: SessionDep, billing_date_gte:date = None,customer_id: int = None) -> List[Invoice]:
     query = select(Invoice)
