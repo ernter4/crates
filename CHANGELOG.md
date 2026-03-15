@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.2](https://github.com/ernter4/crates/compare/v0.4.1...v0.4.2) (2026-03-15)
+
+
+### Bug Fixes
+
+* added missing files ([3cc62b5](https://github.com/ernter4/crates/commit/3cc62b5fe57f40b3cb9154c43a9c063b29a5129c))
+
 ## [0.4.1](https://github.com/ernter4/crates/compare/v0.4.0...v0.4.1) (2026-03-15)
 
 
