@@ -13,6 +13,7 @@ from app.accounting.models import Customer
 from app.ordering.dependencies import OcrClientDep
 from app.ordering.models import Order
 from app.shared.dependencies import SessionDep
+from app.shared.update_database import update_database
 
 router = APIRouter()
 
@@ -35,11 +36,16 @@ def check_outgoing(session:SessionDep,ocr_client: OcrClientDep):
     ocr_client.process_image()
     for record in ocr_client.records:
         if record.customer is not None and record.menu_id is not None:
-            order = Order(
-                crate = record.crate,
-                customer = record.customer,
-                delivery_date = date.today()
-            )
+            statement= select(Order).where(Order.crate==record.crate).where(Order.customer==record.customer).where(Order.delivery_date == date.today())
+            order = session.exec(statement).first()
+            if not order:
+                order = Order(
+                    crate = record.crate,
+                    customer = record.customer,
+                    delivery_date = date.today()
+                )
+
+            update_database(order,session)
             ocr_client.draw_record(record.crate.id, ImageColor.getrgb("Green"))
     return ocr_client.get_image_response()
 
