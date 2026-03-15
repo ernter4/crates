@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.0](https://github.com/ernter4/crates/compare/v0.3.0...v0.4.0) (2026-03-15)
+
+
+### Features
+
+* added ocr ([0b8729e](https://github.com/ernter4/crates/commit/0b8729e8e478cc9e4544f80f8e2dcdf27da7f1a8))
+* finalized ocr ([0d4dfc4](https://github.com/ernter4/crates/commit/0d4dfc400e2074d2958ea06a82de46f30095dcf8))
+
 ## [0.3.0](https://github.com/ernter4/crates/compare/v0.2.4...v0.3.0) (2026-02-07)
 
 
