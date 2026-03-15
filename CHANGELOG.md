@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.3](https://github.com/ernter4/crates/compare/v0.4.2...v0.4.3) (2026-03-15)
+
+
+### Bug Fixes
+
+* added order saving ([bb7eb7a](https://github.com/ernter4/crates/commit/bb7eb7a02d3ca99079c13d10b418d31324c06e1e))
+
 ## [0.4.2](https://github.com/ernter4/crates/compare/v0.4.1...v0.4.2) (2026-03-15)
 
 
