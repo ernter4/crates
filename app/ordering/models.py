@@ -15,7 +15,7 @@ class Crate(BaseCrate,table=True):
 class BaseOrder(SQLModel):
     customer_id : int =Field(foreign_key="customer.id",ondelete="RESTRICT")
     delivery_date : date
-    predicted_return_date : date
+    predicted_return_date : Optional[date]
     return_date : Optional[datetime]
     menu_id : int
     description:Optional[str]

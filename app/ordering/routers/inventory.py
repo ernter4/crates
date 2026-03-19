@@ -42,7 +42,8 @@ def check_outgoing(session:SessionDep,ocr_client: OcrClientDep):
                 order = Order(
                     crate = record.crate,
                     customer = record.customer,
-                    delivery_date = date.today()
+                    delivery_date = date.today(),
+                    menu_id = record.menu_id
                 )
 
             update_database(order,session)

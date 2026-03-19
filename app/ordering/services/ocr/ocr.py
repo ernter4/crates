@@ -10,7 +10,7 @@ from google.cloud.vision_v1 import TextAnnotation
 from matplotlib.patches import Polygon
 from numpy._core.strings import isnumeric
 
-from sqlmodel import Session,select
+from sqlmodel import Session,select,func
 
 
 from app.accounting.models import Customer
@@ -47,7 +47,7 @@ class OCR:
         r, g, b = img_array[:, :, 0], img_array[:, :, 1], img_array[:, :, 2]
 
         # Maske für rote Bereiche: Rot > 150 UND (Rot > Grün + 50) UND (Rot > Blau + 50)
-        red_mask = (r > 160) & (r > g + 50) & (r > b + 50)
+        red_mask = (r > 150) & (r > g + 50) & (r > b + 50)
 
         # Erstelle ein neues Bild mit nur den roten Bereichen
         red_only = np.zeros_like(img_array)
@@ -133,7 +133,7 @@ class OCR:
         record.shapes.append(self.get_shape(box))
         polygon = self.get_search_polygon(box)
 
-        statement = select(Customer)
+
 
         for textblock in self.text_annotations:
             if self.is_in_polygon(polygon, textblock):
@@ -141,12 +141,15 @@ class OCR:
                 if isnumeric(textblock.description.strip() ):
                     record.menu_id = int(textblock.description)
                 else:
-                    statement = statement.where(Customer.display_text.like(f"%{textblock.description}%"))
+                    statement = select(Customer)
+                    statement = statement.where(
+                        func.lower(Customer.display_text).like(f"%{textblock.description.lower()}%")
+                    )
 
-        customers =self.session.exec(statement).fetchall()
-        if len(customers)==1:
-            record.customer = customers[0]
-            record.shapes.append(self.get_bounding_poly(record.shapes))
+                    customers =self.session.exec(statement).fetchall()
+                    if len(customers)==1:
+                        record.customer = customers[0]
+                        record.shapes.append(self.get_bounding_poly(record.shapes))
         self.records.append(record)
 
     def draw_record(self,crate_id:int,color:ImageColor) -> None:
