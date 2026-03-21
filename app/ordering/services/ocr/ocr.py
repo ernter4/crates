@@ -133,23 +133,21 @@ class OCR:
         record.shapes.append(self.get_shape(box))
         polygon = self.get_search_polygon(box)
 
-
-
+        statement = select(Customer)
         for textblock in self.text_annotations:
             if self.is_in_polygon(polygon, textblock):
                 record.shapes.append(self.get_shape(textblock))
                 if isnumeric(textblock.description.strip() ):
                     record.menu_id = int(textblock.description)
                 else:
-                    statement = select(Customer)
                     statement = statement.where(
                         func.lower(Customer.display_text).like(f"%{textblock.description.lower()}%")
                     )
 
-                    customers =self.session.exec(statement).fetchall()
-                    if len(customers)==1:
-                        record.customer = customers[0]
-                        record.shapes.append(self.get_bounding_poly(record.shapes))
+            customers =self.session.exec(statement).fetchall()
+            if len(customers)==1:
+                record.customer = customers[0]
+                record.shapes.append(self.get_bounding_poly(record.shapes))
         self.records.append(record)
 
     def draw_record(self,crate_id:int,color:ImageColor) -> None:

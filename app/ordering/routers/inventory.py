@@ -23,13 +23,13 @@ def update_inventory(session:SessionDep,ocr_client: OcrClientDep):
     ocr_client.process_image()
     for record in ocr_client.records:
         statement= select(Order)
-        statement = statement.where(Order.return_date is None)and(Order.customer==record.customer)and (Order.crate == record.crate)
-        orders = session.exec(statement)
+        statement = statement.where(Order.return_date is None).where(Order.crate == record.crate)
+        orders = session.exec(statement).all()
         if len(orders)==1:
             order = orders[0]
             order.return_date = datetime.datetime.now()
             session.add(order)
-            ocr_client.draw_record(record.crate_id, ImageColor.getrgb("Green"))
+        ocr_client.draw_record(record.crate.id, ImageColor.getrgb("Green"))
     return ocr_client.get_image_response()
 @router.post("/check_outgoing")
 def check_outgoing(session:SessionDep,ocr_client: OcrClientDep):

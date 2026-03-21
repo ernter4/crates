@@ -1,3 +1,7 @@
+from datetime import date,datetime
+
+
+
 from fastapi import APIRouter
 from sqlmodel import select
 
@@ -8,8 +12,11 @@ from app.shared.update_database import update_database
 router = APIRouter()
 
 @router.get("/")
-def get_crates(session :SessionDep):
-    return session.exec(select(Crate)).fetchall()
+def get_crates(session :SessionDep,seen_after:datetime= None)-> list[Crate]:
+    statement = select(Crate)
+    if seen_after:
+        statement = statement.where(Crate.last_seen > seen_after)
+    return session.exec(statement).fetchall()
 @router.post("/")
 def create_crate(crate :Crate, session : SessionDep):
     update_database(crate, session)
