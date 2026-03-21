@@ -22,6 +22,8 @@ router = APIRouter()
 def update_inventory(session:SessionDep,ocr_client: OcrClientDep):
     ocr_client.process_image()
     for record in ocr_client.records:
+        record.crate.last_seen = datetime.datetime.now()
+        update_database(record.crate,session)
         statement= select(Order)
         statement = statement.where(Order.return_date is None).where(Order.crate == record.crate)
         orders = session.exec(statement).all()
