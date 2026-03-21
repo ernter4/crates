@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/ernter4/crates/compare/v0.4.4...v0.5.0) (2026-03-21)
+
+
+### Features
+
+* added update path ([07528f7](https://github.com/ernter4/crates/commit/07528f7c99b09701e45902819d2fa80fb6585f40))
+
 ## [0.4.4](https://github.com/ernter4/crates/compare/v0.4.3...v0.4.4) (2026-03-19)
 
 
