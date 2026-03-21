@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.1](https://github.com/ernter4/crates/compare/v0.5.0...v0.5.1) (2026-03-21)
+
+
+### Bug Fixes
+
+* added last_seen ([1220dd1](https://github.com/ernter4/crates/commit/1220dd1689c8c9d30773b5f09447ad3ce776d200))
+
 ## [0.5.0](https://github.com/ernter4/crates/compare/v0.4.4...v0.5.0) (2026-03-21)
 
 
