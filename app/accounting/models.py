@@ -45,7 +45,7 @@ class Customer(BaseCustomer, table=True):
     orders: List["Order"] = Relationship(back_populates="customer")
 
 class CreateCustomer(BaseCustomer):
-    customer_number: int | None = None
+    customer_number: Optional[int] = None
     sepa_mandate: bool |None = False
 
 

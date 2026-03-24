@@ -11,7 +11,7 @@ from app.shared.update_database import update_database
 
 router = APIRouter()
 
-@router.get("/")
+@router.get("/",response_model=list[Crate])
 def get_crates(session :SessionDep,seen_after:datetime= None)-> list[Crate]:
     statement = select(Crate)
     if seen_after:

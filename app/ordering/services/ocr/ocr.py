@@ -20,7 +20,7 @@ from app.ordering.services.ocr.vision import send_to_google
 
 class OCR:
     def __init__(self,session,image):
-        self.image:Image = image
+        self.image:Image.Image= image
         self.preprocessed_image:Optional[Image] = None
         self.text_annotations: list[TextAnnotation] = []
         self.box_annotations: list[TextAnnotation] = []
@@ -137,7 +137,7 @@ class OCR:
         for textblock in self.text_annotations:
             if self.is_in_polygon(polygon, textblock):
                 record.shapes.append(self.get_shape(textblock))
-                if isnumeric(textblock.description.strip() ):
+                if isnumeric(textblock.description.strip() and int(textblock.description) <9):
                     record.menu_id = int(textblock.description)
                 else:
                     statement = statement.where(
@@ -186,12 +186,6 @@ class OCR:
 
         return polygon
 
-    def get_image_response(self):
-        # PNG-Format encodieren
-        buffer = io.BytesIO()
-        self.image.save(buffer, format='PNG')
-        buffer.seek(0)
-        return Response(content=buffer.getvalue(), media_type="image/png")
     def process_image(self):
         self.run_ocr()
         for crate in self.box_annotations:
