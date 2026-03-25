@@ -29,7 +29,7 @@ def update_inventory(session: SessionDep, ocr_client: OcrClientDep)-> ImageRespo
         record.crate.last_seen = datetime.datetime.now()
         update_database(record.crate, session)
         statement = select(Order)
-        statement = statement.where(Order.return_date is None).where(Order.crate == record.crate)
+        statement = statement.where(Order.return_date == None).where(Order.crate == record.crate)
         orders = session.exec(statement).all()
         if len(orders) == 1:
             order = orders[0]
