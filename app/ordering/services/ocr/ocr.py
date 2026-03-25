@@ -137,7 +137,7 @@ class OCR:
         for textblock in self.text_annotations:
             if self.is_in_polygon(polygon, textblock):
                 record.shapes.append(self.get_shape(textblock))
-                if isnumeric(textblock.description.strip() and int(textblock.description) <9):
+                if isnumeric(textblock.description.strip()) and int(textblock.description) <9:
                     record.menu_id = int(textblock.description)
                 else:
                     statement = statement.where(
