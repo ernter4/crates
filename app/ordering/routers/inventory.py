@@ -44,7 +44,7 @@ def update_inventory(session: SessionDep, ocr_client: OcrClientDep)-> ImageRespo
 
 
 @router.post("/check_outgoing")
-def check_outgoing(delivery_date: str, session: SessionDep, ocr_client: OcrClientDep)-> ImageResponse:
+def check_outgoing(delivery_date: date, session: SessionDep, ocr_client: OcrClientDep)-> ImageResponse:
     ocr_client.process_image()
     for record in ocr_client.records:
         old_order = session.exec(select(Order).where(Order.crate == record.crate).where(Order.return_date is None)).first()
