@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.5](https://github.com/ernter4/crates/compare/v0.5.4...v0.5.5) (2026-03-25)
+
+
+### Bug Fixes
+
+* fixed error in ocr ([a440bcd](https://github.com/ernter4/crates/commit/a440bcde8733bc8db6646cd4d26c6f2e6fac22d5))
+
 ## [0.5.4](https://github.com/ernter4/crates/compare/v0.5.3...v0.5.4) (2026-03-25)
 
 
