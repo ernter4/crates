@@ -1,5 +1,36 @@
 # Changelog
 
+## [0.6.0](https://github.com/ernter4/crates/compare/v0.5.6...v0.6.0) (2026-03-25)
+
+
+### Features
+
+* added auth ([6ac01da](https://github.com/ernter4/crates/commit/6ac01daab0d0669b58061e56504a58311bc0af9b))
+* added build pipline ([d04530e](https://github.com/ernter4/crates/commit/d04530edc591b665b36d7351b04a5ea7837cbf97))
+* added ocr ([0b8729e](https://github.com/ernter4/crates/commit/0b8729e8e478cc9e4544f80f8e2dcdf27da7f1a8))
+* added release-please config ([8c052e0](https://github.com/ernter4/crates/commit/8c052e083615ee711531e5ce13afb129a669d27f))
+* added update path ([07528f7](https://github.com/ernter4/crates/commit/07528f7c99b09701e45902819d2fa80fb6585f40))
+* finalized ocr ([0d4dfc4](https://github.com/ernter4/crates/commit/0d4dfc400e2074d2958ea06a82de46f30095dcf8))
+
+
+### Bug Fixes
+
+* added last_seen ([1220dd1](https://github.com/ernter4/crates/commit/1220dd1689c8c9d30773b5f09447ad3ce776d200))
+* added missing files ([3cc62b5](https://github.com/ernter4/crates/commit/3cc62b5fe57f40b3cb9154c43a9c063b29a5129c))
+* added order saving ([bb7eb7a](https://github.com/ernter4/crates/commit/bb7eb7a02d3ca99079c13d10b418d31324c06e1e))
+* added permissions ([ecccdf0](https://github.com/ernter4/crates/commit/ecccdf018bae109d4fbb8ae7903b3d1e0f064fec))
+* changed .gitignore ([3a48de7](https://github.com/ernter4/crates/commit/3a48de76a66d3d810035f90f6d34ebccf934302d))
+* deleted wrong build ([28e1c0c](https://github.com/ernter4/crates/commit/28e1c0cab33002a23c11a02bf9746b8cc721d529))
+* fixed coments dockerfile ([a7799c3](https://github.com/ernter4/crates/commit/a7799c3018a9ac2dcb6be9b1c1792b0e6d298731))
+* fixed crates ([ca042ce](https://github.com/ernter4/crates/commit/ca042ce3b506fed2ee9342adbedcc55f7861f296))
+* fixed error in ocr ([a440bcd](https://github.com/ernter4/crates/commit/a440bcde8733bc8db6646cd4d26c6f2e6fac22d5))
+* fixed error in ocr ([69b40a7](https://github.com/ernter4/crates/commit/69b40a7692f456873831e2f5996c8a76b5d460ee))
+* fixed error in ocr ([db49e59](https://github.com/ernter4/crates/commit/db49e59bd1127f1e50c205435065ed7993771203))
+* fixed inventoy ([160e937](https://github.com/ernter4/crates/commit/160e937de3ef1c37f4225e528cb7a4446b0b2224))
+* fixed requirements ([8497ec1](https://github.com/ernter4/crates/commit/8497ec1473ba11b596ba9f51e614950e1f766c1f))
+* fixed update inventory ([39b99bb](https://github.com/ernter4/crates/commit/39b99bbbd2acbb3d21af8dc20a2391b66c2fb756))
+* test release ([29ce7f8](https://github.com/ernter4/crates/commit/29ce7f860e09ed82cb67323393592837b8be8dd2))
+
 ## [0.5.6](https://github.com/ernter4/crates/compare/v0.5.5...v0.5.6) (2026-03-25)
 
 
