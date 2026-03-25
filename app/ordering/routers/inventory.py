@@ -34,7 +34,7 @@ def update_inventory(session: SessionDep, ocr_client: OcrClientDep)-> ImageRespo
         if len(orders) == 1:
             order = orders[0]
             order.return_date = datetime.datetime.now()
-            session.add(order)
+            update_database(order, session)
         ocr_client.draw_record(record.crate.id, ImageColor.getrgb("Green"))
     buffer = BytesIO()
     ocr_client.image.save(buffer, format='JPEG', quality=90)
