@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.6](https://github.com/ernter4/crates/compare/v0.5.5...v0.5.6) (2026-03-25)
+
+
+### Bug Fixes
+
+* fixed update inventory ([39b99bb](https://github.com/ernter4/crates/commit/39b99bbbd2acbb3d21af8dc20a2391b66c2fb756))
+
 ## [0.5.5](https://github.com/ernter4/crates/compare/v0.5.4...v0.5.5) (2026-03-25)
 
 
