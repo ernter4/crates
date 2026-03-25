@@ -48,7 +48,7 @@ def check_outgoing(delivery_date: str, session: SessionDep, ocr_client: OcrClien
     ocr_client.process_image()
     for record in ocr_client.records:
         old_order = session.exec(select(Order).where(Order.crate == record.crate).where(Order.return_date is None)).first()
-        if old_order.delivery_date != delivery_date or old_order.menu_id != record.menu_id or old_order.customer != record.customer:
+        if old_order is not None and (old_order.delivery_date != delivery_date or old_order.menu_id != record.menu_id or old_order.customer != record.customer):
             old_order.return_date = datetime.datetime.now()
             update_database(old_order, session)
 
