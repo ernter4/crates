@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.4](https://github.com/ernter4/crates/compare/v0.6.3...v0.6.4) (2026-03-28)
+
+
+### Bug Fixes
+
+* made assigned crate otional ([8d08d40](https://github.com/ernter4/crates/commit/8d08d40e1f065e4d553587e9ac8eafecd911e888))
+
 ## [0.6.3](https://github.com/ernter4/crates/compare/v0.6.2...v0.6.3) (2026-03-28)
 
 
