@@ -31,6 +31,7 @@ class Order(BaseOrder,ModelWithId,table=True):
     assigned_crate:Crate = Relationship(sa_relationship_kwargs={"foreign_keys": "[Order.assigned_crate_id]"})
 class CreateOrder(BaseOrder):
     id:Optional[int] = None
+    assigned_crate_id:Optional[int] = None
 class OutputOrder(BaseOrder):
     id:int
 
