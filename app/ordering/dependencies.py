@@ -1,8 +1,10 @@
 import io
+from datetime import date
 from typing import Annotated
 
 from PIL import Image
 
+from app.ordering.services.assignment.greedy.Assigner import GreedyAssigner
 from app.ordering.services.ocr.ocr import OCR
 from fastapi import Depends, UploadFile
 
@@ -15,3 +17,9 @@ async def get_ocr_client(session:SessionDep, file:UploadFile):
     ocr_client = OCR(session = session,image= img)
     return ocr_client
 OcrClientDep = Annotated[OCR,Depends(get_ocr_client)]
+
+
+
+async def get_greedy_assigner(session:SessionDep,assign_date:date):
+    return GreedyAssigner(session,assign_date)
+GreedyAssignerDep = Annotated[GreedyAssigner,Depends(get_greedy_assigner)]
