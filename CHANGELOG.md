@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.3](https://github.com/ernter4/crates/compare/v0.6.2...v0.6.3) (2026-03-28)
+
+
+### Bug Fixes
+
+* added editorder ([53dbefb](https://github.com/ernter4/crates/commit/53dbefb9d9592431db97a0ec059d63995bc2c45e))
+
 ## [0.6.2](https://github.com/ernter4/crates/compare/v0.6.1...v0.6.2) (2026-03-28)
 
 
