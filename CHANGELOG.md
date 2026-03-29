@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0](https://github.com/ernter4/crates/compare/v0.6.4...v0.7.0) (2026-03-29)
+
+
+### Features
+
+* added order filtering ([a8414ce](https://github.com/ernter4/crates/commit/a8414ce4a3a6455fa3ae9d88dd153728fe8331d1))
+
 ## [0.6.4](https://github.com/ernter4/crates/compare/v0.6.3...v0.6.4) (2026-03-28)
 
 
