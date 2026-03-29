@@ -4,7 +4,7 @@ import io
 import os
 from datetime import date
 from io import BytesIO
-from typing import Annotated
+from typing import Annotated, Optional
 
 from PIL import Image, ImageColor
 from fastapi import APIRouter, File, UploadFile
@@ -26,16 +26,22 @@ router = APIRouter()
 def update_inventory(session: SessionDep, ocr_client: OcrClientDep)-> ImageResponse:
     ocr_client.process_image()
     for record in ocr_client.records:
-        record.crate.last_seen = datetime.datetime.now()
-        update_database(record.crate, session)
+
         statement = select(Order)
-        statement = statement.where(Order.return_date == None).where(Order.crate == record.crate)
-        orders = session.exec(statement).all()
-        if len(orders) == 1:
-            order = orders[0]
-            order.return_date = datetime.datetime.now()
-            update_database(order, session)
-        ocr_client.draw_record(record.crate.id, ImageColor.getrgb("Green"))
+        statement = statement.where(Order.crate == record.crate).where(Order.customer == record.customer).where(Order.menu_id == record.menu_id)
+        # open order
+        open_order:Optional[Order] = session.exec(statement.where(Order.return_date is None)).first()
+        last_order:Optional[Order]  = session.exec(select(Order).where(Order.crate==record.crate).order_by(Order.return_date)).first()
+        if open_order :
+            open_order.return_date = datetime.datetime.now()
+            update_database(open_order, session)
+            record.crate.last_seen = datetime.datetime.now()
+            update_database(record.crate, session)
+            ocr_client.draw_record(record.crate.id, ImageColor.getrgb("Green"))
+        elif last_order.customer == record.customer and last_order.menu_id == record.menu_id:
+            record.crate.last_seen = datetime.datetime.now()
+            update_database(record.crate, session)
+            ocr_client.draw_record(record.crate.id, ImageColor.getrgb("Green"))
     buffer = BytesIO()
     ocr_client.image.save(buffer, format='JPEG', quality=90)
     # Zu Base64 encodieren

@@ -10,10 +10,19 @@ from app.shared.update_database import update_database
 router = APIRouter()
 
 @router.get("/")
-def get_orders(session: SessionDep,delivery_date:date = None)-> list[OutputOrder]:
+def get_orders(session: SessionDep,delivery_date:date = None,crate_id:int = None, return_date_exists:bool= None, customer_id:int = None)-> list[OutputOrder]:
     statement = select(Order)
     if delivery_date:
         statement= statement.where(Order.delivery_date == delivery_date)
+    if crate_id:
+        statement = statement.where(Order.crate_id == crate_id)
+    if return_date_exists is not None:
+        if return_date_exists:
+            statement = statement.where(Order.return_date.isnot(None))
+        else:
+            statement = statement.where(Order.return_date == None)
+    if customer_id:
+        statement = statement.where(Order.customer_id == customer_id)
 
     return list(session.exec(statement).all())
 @router.get("/{order_id}", response_model=OutputOrder)
