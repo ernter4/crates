@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.1](https://github.com/ernter4/crates/compare/v0.7.0...v0.7.1) (2026-03-30)
+
+
+### Bug Fixes
+
+* changed inventory checks ([288e7df](https://github.com/ernter4/crates/commit/288e7df3353cafc36ca4f6d6c9c5e88bfc196282))
+
 ## [0.7.0](https://github.com/ernter4/crates/compare/v0.6.4...v0.7.0) (2026-03-29)
 
 
