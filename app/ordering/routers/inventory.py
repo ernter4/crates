@@ -13,7 +13,7 @@ from fastapi import Response
 from sqlmodel import Session, select
 
 from app.ordering.dependencies import OcrClientDep
-from app.ordering.model_file import ImageResponse
+from app.ordering.models import ImageResponse
 from app.ordering.models import Order
 from app.shared.dependencies import SessionDep
 from app.shared.update_database import update_database
