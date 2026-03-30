@@ -11,11 +11,10 @@ from fastapi import APIRouter, File, UploadFile
 from fastapi import Response
 
 from sqlmodel import Session, select
-from starlette.responses import HTMLResponse
 
-from app.accounting.models import Customer
 from app.ordering.dependencies import OcrClientDep
-from app.ordering.models import Order, ImageResponse
+from app.ordering.model_file import ImageResponse
+from app.ordering.models import Order
 from app.shared.dependencies import SessionDep
 from app.shared.update_database import update_database
 
@@ -32,13 +31,14 @@ def update_inventory(session: SessionDep, ocr_client: OcrClientDep)-> ImageRespo
         # open order
         open_order:Optional[Order] = session.exec(statement.where(Order.return_date is None)).first()
         last_order:Optional[Order]  = session.exec(select(Order).where(Order.crate==record.crate).order_by(Order.return_date)).first()
-        if open_order :
+
+        if open_order:
             open_order.return_date = datetime.datetime.now()
             update_database(open_order, session)
             record.crate.last_seen = datetime.datetime.now()
             update_database(record.crate, session)
             ocr_client.draw_record(record.crate.id, ImageColor.getrgb("Green"))
-        elif last_order.customer == record.customer and last_order.menu_id == record.menu_id:
+        elif last_order and  last_order.customer == record.customer and last_order.menu_id == record.menu_id:
             record.crate.last_seen = datetime.datetime.now()
             update_database(record.crate, session)
             ocr_client.draw_record(record.crate.id, ImageColor.getrgb("Green"))
