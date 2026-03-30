@@ -78,7 +78,7 @@ class OCR:
             self.text_annotations = initial_future.result()
             box_annotations = prepocessed_future.result()
         for index ,annotation in enumerate(box_annotations):
-            if  re.findall(r'\b\d\d\b', annotation.description):
+            if  re.findall(r'\b\d\d\b', annotation.description) and isnumeric(annotation.description):
                 self.box_annotations.append(annotation)
 
     def extract_box_numbers(self, text_annotations) -> list[TextAnnotation]:

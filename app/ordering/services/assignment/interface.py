@@ -1,7 +1,10 @@
 from sqlmodel import Session, select, desc
 
-from app.ordering.models import Order, AssignmentChanges
 from datetime import date
+
+from app.ordering.models import Order,AssignmentChanges
+
+
 
 class AssignmentServiceInterface:
     def __init__(self,session:Session,assign_date:date):

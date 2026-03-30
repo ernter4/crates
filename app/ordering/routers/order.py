@@ -1,44 +1,19 @@
 from datetime import date
+from typing import Annotated
 
-from fastapi import APIRouter
-from sqlmodel import select
+from fastapi import APIRouter, Depends
 
-from app.ordering.models import Order, BaseOrder, CreateOrder, OutputOrder
+
+from app.ordering.models import  OrderCreate, OrderWithID, get_filter_query, OrderFilter
+from app.ordering.services.models.order import OrderService
+from app.shared.ModelRouter import BaseRouter
 from app.shared.dependencies import SessionDep
 from app.shared.update_database import update_database
 
-router = APIRouter()
 
-@router.get("/")
-def get_orders(session: SessionDep,delivery_date:date = None,crate_id:int = None, return_date_exists:bool= None, customer_id:int = None)-> list[OutputOrder]:
-    statement = select(Order)
-    if delivery_date:
-        statement= statement.where(Order.delivery_date == delivery_date)
-    if crate_id:
-        statement = statement.where(Order.crate_id == crate_id)
-    if return_date_exists is not None:
-        if return_date_exists:
-            statement = statement.where(Order.return_date.isnot(None))
-        else:
-            statement = statement.where(Order.return_date == None)
-    if customer_id:
-        statement = statement.where(Order.customer_id == customer_id)
-
-    return list(session.exec(statement).all())
-@router.get("/{order_id}", response_model=OutputOrder)
-def get_order_by_id(order_id: int, session: SessionDep):
-    return session.get(Order, order_id)
-
-@router.post("/")
-def create_order(order: CreateOrder, session: SessionDep):
-    db_order = Order.model_validate(order)
-    update_database(db_order, session)
-    return order
-
-@router.put("/{order_id}")
-def update_order(order_id: int, updated_order: OutputOrder, session: SessionDep):
-    order = session.get(Order, order_id)
-    for key, value in updated_order.model_dump(exclude_unset=True).items():
-        setattr(order, key, value)
-
-    update_database(order, session)
+class OrderRouter(BaseRouter[OrderService,OrderCreate,OrderWithID,OrderWithID]):
+    prefix = "/orders"
+    tags = ["orders"]
+    dependencies = [SessionDep]
+    def get_filtered(self,filter: Annotated[OrderFilter, Depends(get_filter_query)], session: SessionDep):
+        return self.service_class(session).get_filtered(filter)

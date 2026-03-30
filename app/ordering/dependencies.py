@@ -23,3 +23,5 @@ OcrClientDep = Annotated[OCR,Depends(get_ocr_client)]
 async def get_greedy_assigner(session:SessionDep,assign_date:date):
     return GreedyAssigner(session,assign_date)
 GreedyAssignerDep = Annotated[GreedyAssigner,Depends(get_greedy_assigner)]
+
+
