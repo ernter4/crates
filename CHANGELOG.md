@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.8.0](https://github.com/ernter4/crates/compare/v0.7.2...v0.8.0) (2026-03-31)
+
+
+### Features
+
+* added custom services ([72caa4a](https://github.com/ernter4/crates/commit/72caa4a608d243b29ff7a3757d5cc70a60f77b65))
+* refactored backend ([cec949d](https://github.com/ernter4/crates/commit/cec949d563cc58675a07ccc368ffa0ac5eab8b53))
+
 ## [0.7.2](https://github.com/ernter4/crates/compare/v0.7.1...v0.7.2) (2026-03-30)
 
 
