@@ -19,7 +19,7 @@ class DecimalAsString(decimal.Decimal):
         return handler.generate_schema(decimal.Decimal)
     @classmethod
     def __get_pydantic_json_schema__(cls, core_schema: Any, handler: Any):
-        return {"type": "string", "format": "number"}
+        return {"type": "number", "format": "number"}
 class BaseInvoice(SQLModel, table=False):
     customer_id: int = Field(foreign_key="customer.id",
                             sa_column_kwargs={ "name": "fk_invoice_customer"},
