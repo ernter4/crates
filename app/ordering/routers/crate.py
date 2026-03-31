@@ -1,18 +1,28 @@
-from datetime import date,datetime
-
-
-
-from fastapi import APIRouter
-from sqlmodel import select
-
-from app.ordering.models import Crate, CrateWithID
+from app.ordering.models import CrateFilter, CrateWithID, get_crate_filter_query
 from app.ordering.services.models.CrateService import CrateService
+from fastapi import APIRouter, HTTPException, Depends
 
-from app.shared.ModelRouter import BaseRouter
 from app.shared.dependencies import SessionDep
-from app.shared.update_database import update_database
 
-class CrateRouter(BaseRouter[CrateService,Crate,CrateWithID,CrateWithID]):
-    prefix = "/crates"
-    tags = ["crates"]
-    dependencies = [SessionDep]
+router = APIRouter()
+
+
+resource_name = "Crate"
+@router.post("/",operation_id=f"{resource_name}_post")
+def create(data: CrateWithID, session: SessionDep):
+    return CrateService(session).create(data)
+
+@router.get("/{item_id}", operation_id=f"{resource_name}_get_by_id")
+def get( item_id: int, session: SessionDep) ->  CrateWithID:
+    return CrateService(session).get(item_id)
+
+@router.put("/{item_id}", operation_id=f"{resource_name}_put")
+def update( item_id,data: CrateWithID, session: SessionDep)-> CrateWithID:
+    try:
+        return CrateService(session).update(data)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+@router.get("/",operation_id=f"{resource_name}_list")
+def get_filtered( session: SessionDep , filter= Depends(get_crate_filter_query) )-> list[CrateWithID]:
+    return CrateService(session).get_filtered(filter)

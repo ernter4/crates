@@ -5,6 +5,6 @@ from app.shared.ModelService import ModelService
 
 
 
-class CrateService(ModelService[Crate,Crate,Crate,CrateWithID]):
+class CrateService(ModelService[Crate,Crate,CrateWithID,CrateWithID]):
     def __init__(self, session: Session):
         super().__init__(session, Crate,CrateWithID)

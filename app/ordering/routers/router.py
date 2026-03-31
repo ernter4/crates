@@ -2,14 +2,12 @@ from fastapi import APIRouter, Depends
 
 from app.shared.auth import authorize
 from app.shared.dependencies import CurrentUserDep
+from .crate import router as crate_router
 from .inventory import  router as inventory_router
 #from.order import router as order_router
 from .assigner import  router as assigner_router
-from .order import OrderRouter
-from ..models import OrderCreate, OrderWithID
-from ..services.models.CrateService import CrateService
-from ..services.models.order import OrderService
-from ...shared.ModelRouter import BaseRouter
+from .order import router as order_router
+
 
 
 def auth(user:CurrentUserDep):
@@ -19,8 +17,6 @@ router = APIRouter(
 )
 router.include_router(inventory_router,prefix="/inventory")
 
-crate_router =OrderRouter(service_class=CrateService,ressource_name="crate").router
-order_router =OrderRouter(service_class=OrderService,ressource_name="order").router
 
 
 

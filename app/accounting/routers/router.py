@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 
-from .customer import CustomerRouter
+from .customer import router as customer_router
 from .invoice import router as invoices_router
 from  .export import router as export_router
 from ..services.models.customerService import CustomerService
@@ -14,7 +14,7 @@ def auth(user:CurrentUserDep):
 router = APIRouter(
     dependencies=[Depends(auth)]
 )
-router.include_router(CustomerRouter(service_class=CustomerService,ressource_name="customer").router, prefix="/customer")
+router.include_router(  customer_router,prefix="/customer")
 router.include_router(  invoices_router,prefix="/invoice")
 router.include_router(export_router, prefix="/export")
 

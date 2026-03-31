@@ -56,8 +56,9 @@ class CustomerCreate(BaseCustomer):
     sepa_mandate: bool | None = False
 
 
-class CustomerWithID(BaseCustomer):
-    pass
+class CustomerWithID(BaseCustomer,ModelWithId):
+    id:int
+
 
 
 class CustomerFilter(CustomSQLModel):

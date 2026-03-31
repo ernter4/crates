@@ -55,7 +55,7 @@ class OrderFilter(CustomSQLModel):
     delivery_date:Optional[date] = None
     return_date_exists:Optional[bool] = None
 
-def get_filter_query(
+def get_order_filter_query(
     customer_id: Optional[int] = None,
     crate_id: Optional[int] = None,
     delivery_date: Optional[date] = None,

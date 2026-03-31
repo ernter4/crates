@@ -13,12 +13,8 @@ class BaseCrate(SQLModel, table=False):
 class Crate(BaseCrate,ModelWithId,table=True):
     id: int = Field(default=None,primary_key=True)
     orders: list["Order"] = Relationship(back_populates="crate",sa_relationship_kwargs={"foreign_keys": "[Order.crate_id]"})
-
 class CrateWithID(BaseCrate, ModelWithId):
     id: int
-    model_config = {
-        "json_schema_extra": {"title": "Crate"}
-    }
 
 
 class CrateRecord(SQLModel):
@@ -26,3 +22,9 @@ class CrateRecord(SQLModel):
     customer : Optional["Customer"] = None
     shapes: list[list[tuple[int,int]]] =[]
     menu_id:int = None
+class CrateFilter(SQLModel):
+    last_seen_gte:Optional[datetime] = None
+
+
+def get_crate_filter_query(last_seen_gte:Optional[datetime] = None) -> CrateFilter:
+    return CrateFilter(last_seen_gte=last_seen_gte)

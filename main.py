@@ -12,7 +12,7 @@ load_dotenv()
 
 from app.accounting.routers.router import router as accounting_router
 from app.ordering.routers.router import router as ordering_router
-app = FastAPI(root_path="/api")
+app = FastAPI(root_path="/api",separate_input_output_schemas=False)
 
 origins = os.getenv("CRATES_CORS_ALLOWED_ORIGINS").strip().split(",")
 

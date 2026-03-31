@@ -1,19 +1,35 @@
 from datetime import date
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
+from sqlmodel import SQLModel
 
-
-from app.ordering.models import  OrderCreate, OrderWithID, get_filter_query, OrderFilter
+from app.ordering.models import OrderCreate, OrderWithID, OrderFilter, get_order_filter_query
 from app.ordering.services.models.order import OrderService
 from app.shared.ModelRouter import BaseRouter
-from app.shared.dependencies import SessionDep
+from app.shared.dependencies import SessionDep, CurrentUserDep
 from app.shared.update_database import update_database
 
 
-class OrderRouter(BaseRouter[OrderService,OrderCreate,OrderWithID,OrderWithID]):
-    prefix = "/orders"
-    tags = ["orders"]
-    dependencies = [SessionDep]
-    def get_filtered(self,filter: Annotated[OrderFilter, Depends(get_filter_query)], session: SessionDep):
-        return self.service_class(session).get_filtered(filter)
+router = APIRouter()
+
+
+resource_name = "Order"
+@router.post("/",operation_id=f"{resource_name}_post")
+def create(data: OrderWithID, session: SessionDep, current_user: CurrentUserDep):
+    return OrderService(session, current_user).create(data)
+
+@router.get("/{item_id}", operation_id=f"{resource_name}_get")
+def get( item_id: int, session: SessionDep, current_user: CurrentUserDep) ->  OrderWithID:
+    return OrderService(session, current_user).get(item_id)
+
+@router.put("/{item_id}", operation_id=f"{resource_name}_put")
+def update( item_id:int,data: OrderWithID, session: SessionDep, current_user: CurrentUserDep)-> OrderWithID:
+    try:
+        return OrderService(session, current_user).update(data,item_id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+@router.get("/",operation_id=f"{resource_name}_list")
+def get_filtered(  session: SessionDep,current_user: CurrentUserDep,filter = Depends(get_order_filter_query))-> list[OrderWithID]:
+    return OrderService(session, current_user).get_filtered(filter)

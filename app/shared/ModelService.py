@@ -9,7 +9,6 @@ TDatabase = TypeVar("TDatabase", bound=ModelWithId)
 TCreate = TypeVar("TCreate", bound=SQLModel)
 TUpdate = TypeVar("TUpdate", bound=ModelWithId)
 Tout = TypeVar("Tout", bound=ModelWithId)
-TFilter = TypeVar("TFilter",bound=SQLModel)
 
 class ModelService(Generic[TDatabase, TCreate, TUpdate, Tout]):
     def __init__(self, session: Session,model_class: Type[TDatabase], out_class: Type[Tout],current_user:User = None):
@@ -30,9 +29,8 @@ class ModelService(Generic[TDatabase, TCreate, TUpdate, Tout]):
     def get(self,item_id:int) -> Tout:
         return self.session.get(self.model_class,item_id)
 
-    def update(self, data: TUpdate) -> Tout:
-        # ID direkt aus dem übergebenen Objekt ziehen
-        obj_id: int = data.id
+    def update(self, data: TUpdate,item_id:Optional[int]= None ) -> Tout:
+        obj_id = item_id or data.id
 
         db_obj = self.session.get(self.model_class, obj_id)
         if not db_obj:
@@ -47,11 +45,19 @@ class ModelService(Generic[TDatabase, TCreate, TUpdate, Tout]):
         self.session.commit()
         self.session.refresh(db_obj)
         return self.out_class.model_validate(db_obj)
-    def get_filtered(self, filter: TFilter) -> list[Tout]:
+    def get_filtered(self, filter:SQLModel) -> list[Tout]:
         filter_statement = select(self.model_class)
         for key, value in filter.model_dump(exclude_none=True).items():
             if key.endswith("_exists"):
                 filter_statement = filter_statement.where(getattr(self.model_class, key[:-7]) is not None)
+            elif key.endswith("_gte"):
+                filter_statement = filter_statement.where(getattr(self.model_class, key[:-4])>= value)
+            elif key.endswith("_gt"):
+                filter_statement = filter_statement.where(getattr(self.model_class, key[:-3])> value)
+            elif key.endswith("_lte"):
+                filter_statement = filter_statement.where(getattr(self.model_class, key[:-4])<= value)
+            elif key.endswith("_lt"):
+                filter_statement = filter_statement.where(getattr(self.model_class, key[:-3])< value)
             else:
                 filter_statement = filter_statement.where(getattr(self.model_class, key) == value)
 
