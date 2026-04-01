@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.1](https://github.com/ernter4/crates/compare/v0.8.0...v0.8.1) (2026-04-01)
+
+
+### Bug Fixes
+
+* changeddecimal definition for frontend ([15cd728](https://github.com/ernter4/crates/commit/15cd728d04d9a36a5e2cb4eaacebd5b576b2e060))
+
 ## [0.8.0](https://github.com/ernter4/crates/compare/v0.7.2...v0.8.0) (2026-03-31)
 
 
