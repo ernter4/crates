@@ -61,6 +61,7 @@ class CustomerWithID(BaseCustomer,ModelWithId):
 
 
 
+
 class CustomerFilter(CustomSQLModel):
     customer_number: Optional[int] = None
     email: Optional[EmailStr] = None
