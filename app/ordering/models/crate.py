@@ -4,9 +4,9 @@ from typing import Optional, TYPE_CHECKING
 from sqlmodel import SQLModel, Field, Relationship
 
 from app.shared.models import ModelWithId
-
+from app.accounting.models import Customer
 if TYPE_CHECKING:
-    from app.ordering.models import Order,Customer
+    from app.ordering.models import Order
 
 class BaseCrate(SQLModel, table=False):
     last_seen:Optional[datetime] = None
