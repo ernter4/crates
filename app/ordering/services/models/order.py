@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Generic, TypeVar, Type, Any
+from typing import Generic, TypeVar, Type, Any, Optional
 from sqlmodel import SQLModel, Session, select, and_, or_
 
 from app.ordering.models import OrderCreate, Order, OrderWithID, OrderHistory, OrderBase
@@ -11,8 +11,9 @@ from app.accounting.models import Customer
 class OrderService(ModelService[Order,OrderCreate,Order,OrderWithID]):
     def __init__(self, session: Session,current_user:User):
         super().__init__(session, Order,OrderWithID,current_user= current_user)
-    def update(self, data: OrderWithID,item_id) -> OrderWithID:
+    def update(self, data: OrderWithID,item_id: Optional[int] = None) -> OrderWithID:
         self.check_for_overlap(Order.model_validate(data))
+
         return super().update(data,item_id)
     def create(self, data: TCreate) -> Tout:
         self.check_for_overlap(Order.model_validate(data))
@@ -25,7 +26,9 @@ class OrderService(ModelService[Order,OrderCreate,Order,OrderWithID]):
         statement = select(Order).where(Order.crate_id == current_order.crate_id).where( Order.id != current_order.id)
         overlap :list[Order]= []
         if current_order.return_date is None:
-            overlap.append(self.session.exec(statement.where(Order.return_date == None)).first())
+            bad_order = self.session.exec(statement.where(Order.return_date == None)).first()
+            if bad_order:
+                overlap.append(bad_order)
         else:
             values = self.session.exec(
                 statement.where(

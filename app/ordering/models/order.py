@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 class OrderBase(CustomSQLModel):
     customer_id : int =Field(foreign_key="customer.id",ondelete="RESTRICT")
-    delivery_date : date = None
+    delivery_date : date
     predicted_return_date : Optional[date] = None
     return_date : Optional[datetime] = None
     assigned_crate_id : Optional[int] =Field(foreign_key="crate.id",ondelete="RESTRICT")
