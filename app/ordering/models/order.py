@@ -54,17 +54,24 @@ class OrderFilter(CustomSQLModel):
     crate_id:Optional[int] = None
     delivery_date:Optional[date] = None
     return_date_exists:Optional[bool] = None
+    delivery_date_gte:Optional[date] = None
+    delivery_date_lte:Optional[date] = None
 
 def get_order_filter_query(
     customer_id: Optional[int] = None,
     crate_id: Optional[int] = None,
     delivery_date: Optional[date] = None,
-    return_date_exists: Optional[bool] = None
+    return_date_exists: Optional[bool] = None,
+    delivery_date_gte: Optional[date] = None,
+    delivery_date_lte: Optional[date] = None
+
 ) -> OrderFilter:
     return OrderFilter(
         customer_id=customer_id,
         crate_id=crate_id,
         delivery_date=delivery_date,
+        delivery_date_gte = delivery_date_gte,
+        delivery_date_lte = delivery_date_lte,
         return_date_exists=return_date_exists
     )
 

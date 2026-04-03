@@ -49,7 +49,10 @@ class ModelService(Generic[TDatabase, TCreate, TUpdate, Tout]):
         filter_statement = select(self.model_class)
         for key, value in filter.model_dump(exclude_none=True).items():
             if key.endswith("_exists"):
-                filter_statement = filter_statement.where(getattr(self.model_class, key[:-7]) is not None)
+                if value:
+                    filter_statement = filter_statement.where(getattr(self.model_class, key[:-7]) != None)
+                else:
+                    filter_statement = filter_statement.where(getattr(self.model_class, key[:-7]) ==  None)
             elif key.endswith("_gte"):
                 filter_statement = filter_statement.where(getattr(self.model_class, key[:-4])>= value)
             elif key.endswith("_gt"):

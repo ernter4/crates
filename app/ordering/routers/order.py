@@ -30,7 +30,7 @@ def update( item_id:int,data: OrderWithID, session: SessionDep, current_user: Cu
     try:
         return OrderService(session, current_user).update(data,item_id)
     except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=422, detail=str(e))
 
 @router.get("/",operation_id=f"{resource_name}_list")
 def get_filtered(  session: SessionDep,current_user: CurrentUserDep,filter = Depends(get_order_filter_query))-> list[OrderWithID]:
