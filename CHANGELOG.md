@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.4](https://github.com/ernter4/crates/compare/v0.8.3...v0.8.4) (2026-04-04)
+
+
+### Bug Fixes
+
+* finalized date checks ([ecf40ab](https://github.com/ernter4/crates/commit/ecf40abd9d969d552f8c8fe0661afe690fbedf17))
+
 ## [0.8.3](https://github.com/ernter4/crates/compare/v0.8.2...v0.8.3) (2026-04-03)
 
 
