@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 from typing import Generic, TypeVar, Type, Any, Optional
 from sqlmodel import SQLModel, Session, select, and_, or_
 
@@ -35,13 +35,13 @@ class OrderService(ModelService[Order,OrderCreate,Order,OrderWithID]):
                     or_(
                         # Erster Block: current_order.delivery_date >= Order.delivery_date AND Order.delivery_date < Order.return_date
                         and_(
-                            current_order.delivery_date >= Order.delivery_date,
-                            Order.delivery_date < Order.return_date
+                            current_order.delivery_date <= Order.delivery_date,
+                            Order.delivery_date < current_order.return_date.date()
                         ),
                         # Zweiter Block: current_order.delivery_date > Order.return_date AND Order.return_date <= current_order.return_date
                         and_(
-                            current_order.delivery_date > Order.return_date,
-                            Order.return_date <= current_order.return_date
+                            current_order.delivery_date < Order.return_date,
+                            Order.return_date < current_order.return_date
                         )
                     )
                 )
