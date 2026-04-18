@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.0](https://github.com/ernter4/crates/compare/v0.8.4...v0.9.0) (2026-04-18)
+
+
+### Features
+
+* added to close orders at crate last seen update ([61ee197](https://github.com/ernter4/crates/commit/61ee1971cc9d32856b557655ad024199695416d8))
+
 ## [0.8.4](https://github.com/ernter4/crates/compare/v0.8.3...v0.8.4) (2026-04-04)
 
 
