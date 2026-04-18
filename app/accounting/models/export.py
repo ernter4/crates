@@ -12,6 +12,7 @@ class AccountingExport(BaseAccountingExport, table=True):
     created_at: datetime
     id: int = Field(default=None, primary_key=True)
     sepa_xml: str | None = None
+
 class CreateAccountingExport(BaseAccountingExport):
     pass
 
