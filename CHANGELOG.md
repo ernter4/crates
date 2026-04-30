@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.1](https://github.com/ernter4/crates/compare/v0.9.0...v0.9.1) (2026-04-30)
+
+
+### Bug Fixes
+
+* added support for same day return and delivery ([cb8990f](https://github.com/ernter4/crates/commit/cb8990fce90260aa0d2cf6db581a80f2de144a83))
+
 ## [0.9.0](https://github.com/ernter4/crates/compare/v0.8.4...v0.9.0) (2026-04-18)
 
 
