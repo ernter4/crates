@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.2](https://github.com/ernter4/crates/compare/v0.9.1...v0.9.2) (2026-05-01)
+
+
+### Bug Fixes
+
+* added delete route for orders ([26d30ad](https://github.com/ernter4/crates/commit/26d30adcf77f7197908b41a9009959686ed099bf))
+
 ## [0.9.1](https://github.com/ernter4/crates/compare/v0.9.0...v0.9.1) (2026-04-30)
 
 
