@@ -28,7 +28,9 @@ class ModelService(Generic[TDatabase, TCreate, TUpdate, Tout]):
         return self.out_class.model_validate(db_obj)
     def get(self,item_id:int) -> Tout:
         return self.session.get(self.model_class,item_id)
-
+    def delete(self,item_id:int):
+        self.session.delete(self.session.get(self.model_class,item_id))
+        self.session.commit()
     def update(self, data: TUpdate,item_id:Optional[int]= None ) -> Tout:
         obj_id = item_id or data.id
 

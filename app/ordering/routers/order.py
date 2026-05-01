@@ -35,3 +35,6 @@ def update( item_id:int,data: OrderWithID, session: SessionDep, current_user: Cu
 @router.get("/",operation_id=f"{resource_name}_list")
 def get_filtered(  session: SessionDep,current_user: CurrentUserDep,filter = Depends(get_order_filter_query))-> list[OrderWithID]:
     return OrderService(session, current_user).get_filtered(filter)
+@router.delete("/{item_id}",operation_id=f"{resource_name}_delete")
+def delete(item_id:int, session: SessionDep,current_user: CurrentUserDep ):
+    return OrderService(session,current_user).delete(item_id)
