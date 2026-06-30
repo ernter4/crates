@@ -11,6 +11,7 @@ WORKDIR /app
 # Kopiere die Paketlisten klassisch rein (sehr stabiles Docker-Caching)
 COPY pyproject.toml uv.lock ./
 
+
 # Installiere nur die Abhängigkeiten
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-install-project
