@@ -3,7 +3,6 @@ from fastapi import APIRouter, Depends
 from app.shared.auth import authorize
 from app.shared.dependencies import CurrentUserDep
 from .crate import router as crate_router
-from .inventory import  router as inventory_router
 #from.order import router as order_router
 from .assigner import  router as assigner_router
 from .order import router as order_router
@@ -15,7 +14,7 @@ def auth(user:CurrentUserDep):
 router = APIRouter(
     dependencies=[Depends(auth)]
 )
-router.include_router(inventory_router,prefix="/inventory")
+
 
 
 
