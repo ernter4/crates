@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.10.0](https://github.com/ernter4/crates/compare/v0.9.2...v0.10.0) (2026-06-30)
+
+
+### Features
+
+* added uv support ([2d6d2fc](https://github.com/ernter4/crates/commit/2d6d2fc010a0a18e3071fa41878ddeb2ba326fb7))
+* added uv support ([6c1827a](https://github.com/ernter4/crates/commit/6c1827a03824027752b57eef50f0b196a10343a2))
+
+
+### Bug Fixes
+
+* added uv support for pylint ([3e13a4f](https://github.com/ernter4/crates/commit/3e13a4faaed9b12f8cf68130ac54674e18b2a389))
+
 ## [0.9.2](https://github.com/ernter4/crates/compare/v0.9.1...v0.9.2) (2026-05-01)
 
 
