@@ -1,5 +1,7 @@
 from datetime import  datetime,time
 from typing import Generic, TypeVar, Type, Any, Optional
+
+from anyio import current_effective_deadline
 from sqlmodel import SQLModel, Session, select, and_, or_
 
 from app.ordering.models import OrderCreate, Order, OrderWithID, OrderHistory, OrderBase
@@ -23,6 +25,9 @@ class OrderService(ModelService[Order,OrderCreate,Order,OrderWithID]):
 
     def check_for_overlap(self, current_order:Order):
 
+        ## without crate there is no overlap
+        if current_order.crate is None:
+            return
         statement = select(Order).where(Order.crate_id == current_order.crate_id).where( Order.id != current_order.id)
         overlap :list[Order]= []
         if current_order.return_date is None:

@@ -1,6 +1,7 @@
 from datetime import date, datetime
 from typing import Optional, TYPE_CHECKING
 
+from sqlalchemy import text
 from sqlmodel import Field, Relationship, SQLModel
 
 from app.shared.models import CustomSQLModel, ModelWithId
@@ -18,6 +19,10 @@ class OrderBase(CustomSQLModel):
     menu_id : int
     description:Optional[str] =None
     crate_id : Optional[int] =Field(foreign_key="crate.id",ondelete="RESTRICT")
+    deleted: bool = Field(
+        default=False,
+        sa_column_kwargs={"server_default": text("false")}
+    )
 
 class Order(OrderBase, ModelWithId, table=True):
     id :Optional [int] = Field(default=None, primary_key=True)
