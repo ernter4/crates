@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.11.0](https://github.com/ernter4/crates/compare/v0.10.0...v0.11.0) (2026-07-02)
+
+
+### Features
+
+* added delete ([901e89e](https://github.com/ernter4/crates/commit/901e89ee18ab3d90f0ab374362955c7877d9733c))
+* added deleted filter ([32946b0](https://github.com/ernter4/crates/commit/32946b0a9ab169a06081a5b63c09ab74c07f1982))
+
 ## [0.10.0](https://github.com/ernter4/crates/compare/v0.9.2...v0.10.0) (2026-06-30)
 
 
