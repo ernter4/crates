@@ -9,7 +9,6 @@ from app.ordering.services.assignment.interface import AssignmentServiceInterfac
 
 class GreedyAssigner(AssignmentServiceInterface):
     def assign(self):
-        self.orders  = list(self.session.exec(select (Order).where(Order.delivery_date == self.assign_date)).all())
         crate_alias = aliased(Crate)
         present_statement =select(crate_alias).where(~Crate.orders.any(Order.return_date == None))
 

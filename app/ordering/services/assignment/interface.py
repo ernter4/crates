@@ -10,7 +10,7 @@ class AssignmentServiceInterface:
     def __init__(self,session:Session,assign_date:date):
         self.session= session
         self.assign_date= assign_date
-        self.orders: list[Order] = []
+        self.orders: list[Order] = list(self.session.exec(select (Order).where(Order.delivery_date == self.assign_date)).all())
     def assign(self):
         raise NotImplementedError
     def get_changes(self):
