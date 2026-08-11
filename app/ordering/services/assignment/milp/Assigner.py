@@ -1,172 +1,206 @@
+from datetime import timedelta
+
 import pulp
-import pandas as pd
 
-# ==========================================
-# 1. BEISPIELDATEN (Input Data)
-# ==========================================
+from sqlmodel import select, desc
 
-# Kundenliste
-customers = ["Kunde_A", "Kunde_B", "Kunde_C"]
+from app.ordering.models import Order, Crate
+from app.ordering.services.assignment.interface import AssignmentServiceInterface
 
-# Verfügbare Kisten
-boxes = [ i for i in range(1, 5)]  # 5 Kisten
 
-# Initialzustand am Morgen (U_0): Welche Karte klebt morgens auf welcher Kiste?
-# Kiste 1 & 2 -> Kunde A, Kiste 3 & 4 -> Kunde B, Kiste 5 -> Kunde C
-initial_state = {
-    1: "Kunde_A",
-    2: "Kunde_A",
-    3: "Kunde_B",
-    4: "Kunde_B",
-}
+class MilpAssigner(AssignmentServiceInterface):
+    """
+    MILP-basierte Zuordnung von Bestellungen zu Kisten (Kartenwechsel-Minimierung).
 
-# Unsortierte Jobs des Tages (Startzeit in Minuten ab 00:00 Uhr, Dauer in Minuten)
-raw_jobs = [
-    {"id": "Job_1", "customer": "Kunde_A", "start": 1, "duration": 2},
-    {"id": "Job_2", "customer": "Kunde_B", "start":1, "duration": 3},  # 08:00 - 09:30 (zeitgleich mit Job 1)
-    {"id": "Job_3", "customer": "Kunde_C", "start": 510, "duration": 60},  # 08:30 - 09:30
-    {"id": "Job_4", "customer": "Kunde_A", "start": 600, "duration": 180},  # 10:00 - 13:00
-    {"id": "Job_5", "customer": "Kunde_B", "start": 630, "duration": 120},  # 10:30 - 12:30
-    {"id": "Job_6", "customer": "Kunde_A", "start": 780, "duration": 90},  # 13:00 - 14:30
-]
+    Nur die Bestellungen des Tages `self.assign_date` (self.orders) werden
+    tatsächlich neu zugeordnet und in der Datenbank gespeichert. Alle
+    künftigen Bestellungen (delivery_date > assign_date) fließen lediglich
+    als zusätzliche Jobs in die Optimierung ein, damit die heutige
+    Zuordnung eine bereits absehbare künftige Belegung der Kisten
+    berücksichtigt - ihre Kistenzuordnung wird dabei NICHT verändert.
+    """
 
-# ==========================================
-# 2. PRE-PROCESSING
-# ==========================================
+    def assign(self):
+        if not self.orders:
+            return
 
-# Strikt chronologische Sortierung nach Startzeit (mit Job-ID als Tie-Breaker)
-sorted_jobs = sorted(raw_jobs, key=lambda x: (x["start"], x["id"]))
+        # ==========================================
+        # 1. EINGABEDATEN (aus der Datenbank)
+        # ==========================================
 
-# Mapping der Indizes j in {1, ..., n}
-n_jobs = len(sorted_jobs)
-J = list(range(1, n_jobs + 1))
-K = boxes
-C = customers
+        # Verfügbare Kisten
+        crates = list(self.session.exec(select(Crate)).all())
+        if not crates:
+            return
+        boxes = [crate.id for crate in crates]
 
-# Dictionary-Zugriffe für Parameter
-job_dict = {j: sorted_jobs[j - 1] for j in J}
-S = {j: job_dict[j]["start"] for j in J}
-P = {j: job_dict[j]["duration"] for j in J}
-E = {j: S[j] + P[j] for j in J}
-c_job = {j: job_dict[j]["customer"] for j in J}
+        # Zukünftige Bestellungen dienen nur als Hilfe für die Optimierung
+        # (bessere Vorausplanung der Kartenwechsel) - ihre Kistenzuordnung
+        # wird nicht verändert/gespeichert.
+        future_orders = list(
+            self.session.exec(
+                select(Order)
+                .where(Order.delivery_date > self.assign_date )
+                .where(Order.delivery_date< self.assign_date+timedelta(days=5))
+                .where(Order.deleted == False)
+            ).all()
+        )
+        job_orders = list(self.orders) + future_orders
+        order_by_id = {order.id: order for order in job_orders}
 
-# Binäre Matrix U_0
-U_0 = {}
-for k in K:
-    for c in C:
-        U_0[k, c] = 1 if initial_state[k] == c else 0
+        customers = {order.customer_id for order in job_orders}
 
-# Erzeugung des Überlappungsgraphen O
-O = []
-for j1 in J:
-    for j2 in J:
-        if j1 < j2 and S[j1] <= S[j2] < E[j1]:
-            O.append((j1, j2))
+        # Initialzustand am Morgen (U_0): Welche Karte klebt morgens auf welcher Kiste?
+        # -> Kunde der letzten Bestellung, die die Kiste vor assign_date hatte
+        initial_state = {}
+        for crate in crates:
+            last_order = self.session.exec(
+                select(Order)
+                .where(Order.crate_id == crate.id)
+                .where(Order.delivery_date < self.assign_date)
+                .order_by(desc(Order.delivery_date))
+            ).first()
+            if last_order is not None:
+                initial_state[crate.id] = last_order.customer_id
+                customers.add(last_order.customer_id)
 
-# ==========================================
-# 3. MILP MODELLERSTELLUNG (PuLP)
-# ==========================================
+        # Unsortierte Jobs des Zeitraums (Start = delivery_date, Dauer bis return_date)
+        # Ist return_date (noch) nicht gesetzt (Kiste wurde noch nicht
+        # zurückgegeben), ist die Dauer unbekannt - der Job blockiert dann
+        # nur seinen eigenen delivery_date für die Überlappungsprüfung.
+        raw_jobs = [
+            {
+                "id": order.id,
+                "customer": order.customer_id,
+                "start": order.delivery_date.toordinal(),
+                "end": (
+                    order.return_date.date().toordinal()
+                    if order.return_date is not None
+                    else order.delivery_date.toordinal()
+                ),
+            }
+            for order in job_orders
+        ]
 
-model = pulp.LpProblem("Kisten_Scheduling_Minimum_Cards", pulp.LpMinimize)
+        # ==========================================
+        # 2. PRE-PROCESSING
+        # ==========================================
 
-# --- Entscheidungsvariablen ---
-# ÄNDERUNG: Explizite Liste von Tuples übergeben
-x = pulp.LpVariable.dicts("x", [(j, k) for j in J for k in K], cat=pulp.LpBinary)
-y = pulp.LpVariable.dicts("y", [(j, k) for j in J for k in K], cat=pulp.LpBinary)
-u = pulp.LpVariable.dicts("u", [(j, k, c) for j in J for k in K for c in C], cat=pulp.LpBinary)
+        # Strikt chronologische Sortierung nach Startzeit (mit Job-ID als Tie-Breaker)
+        sorted_jobs = sorted(raw_jobs, key=lambda x: (x["start"], x["id"]))
 
-# --- Zielfunktion ---
-model += pulp.lpSum(y[j, k] for j in J for k in K), "Gesamtzahl_Kartenwechsel"
+        # Mapping der Indizes j in {1, ..., n}
+        n_jobs = len(sorted_jobs)
+        J = list(range(1, n_jobs + 1))
+        K = boxes
+        C = sorted(customers)
 
-# --- Nebenbedingungen ---
+        # Dictionary-Zugriffe für Parameter
+        job_dict = {j: sorted_jobs[j - 1] for j in J}
+        S = {j: job_dict[j]["start"] for j in J}
+        E = {j: job_dict[j]["end"] for j in J}
+        c_job = {j: job_dict[j]["customer"] for j in J}
 
-# A. Eindeutige Job-Zuweisung: Jeder Job genau eine Kiste
-for j in J:
-    model += pulp.lpSum(x[j, k] for k in K) == 1, f"Assign_Job_{j}"
+        # Kundencodes: 0 = keine Karte/leere Kiste, 1..|C| = tatsächliche Kunden.
+        # Ersetzt die frühere One-Hot-Matrix U_0 (Kiste x Kunde) durch einen
+        # einzelnen Code pro Kiste - das ist der Schlüssel zur Verkleinerung
+        # des Modells weiter unten (siehe state[j,k]).
+        c_code = {c: idx + 1 for idx, c in enumerate(C)}
+        big_m = max(len(C), 1)  # deckt den vollen Wertebereich der Codes ab
 
-# B. Kapazität & Zeitkonflikte (Überlappungssperre)
-for k in K:
-    for (j1, j2) in O:
-        model += x[j1, k] + x[j2, k] <= 1, f"Overlap_k{k}_j{j1}_j{j2}"
+        initial_code = {
+            k: c_code[initial_state[k]] if k in initial_state else 0
+            for k in K
+        }
 
-# C. Eindeutigkeit des Zustandscodes
-for j in J:
-    for k in K:
-        model += pulp.lpSum(u[j, k, c] for c in C) == 1, f"SingleState_j{j}_k{k}"
+        # Erzeugung des Überlappungsgraphen O
+        O = []
+        for j1 in J:
+            for j2 in J:
+                if j1 < j2 and S[j1] <= S[j2] < E[j1]:
+                    O.append((j1, j2))
 
-# ==========================================
-# D. Sequentielle Zustandsverfolgung (u_j,k,c)
-# ==========================================
+        # ==========================================
+        # 3. MILP MODELLERSTELLUNG (PuLP)
+        # ==========================================
 
-for k in K:
-    # --- 1. Neuzuweisung bei Nutzung (hängt nur von j und k ab) ---
-    # Für j = 1
-    model += u[1, k, c_job[1]] >= x[1, k], f"StateInit_Use_k{k}"
+        model = pulp.LpProblem("Kisten_Scheduling_Minimum_Cards", pulp.LpMinimize)
 
-    # Für j > 1
-    for j in J:
-        if j > 1:
-            model += u[j, k, c_job[j]] >= x[j, k], f"State_Use_j{j}_k{k}"
+        # --- Entscheidungsvariablen ---
+        x = pulp.LpVariable.dicts("x", [(j, k) for j in J for k in K], cat=pulp.LpBinary)
+        y = pulp.LpVariable.dicts("y", [(j, k) for j in J for k in K], cat=pulp.LpBinary)
+        # state[j,k]: Kundencode, der nach Job j auf Kiste k "klebt". Da dieser
+        # Wert durch x eindeutig festgelegt wird, genügt EINE kontinuierliche
+        # Variable pro (j,k) statt eines binären u[j,k,c] pro Kunde c - das
+        # spart einen Faktor |C| an Variablen und Nebenbedingungen.
+        state = pulp.LpVariable.dicts(
+            "state", [(j, k) for j in J for k in K], lowBound=0, upBound=big_m, cat=pulp.LpContinuous
+        )
+        # d[j,k] = 1, falls der Kundencode vor Job j von dessen Kunde abweicht
+        d = pulp.LpVariable.dicts("d", [(j, k) for j in J for k in K], cat=pulp.LpBinary)
 
-    # --- 2. Zustandserhalt bei Nicht-Nutzung (hängt von j, k UND c ab) ---
-    for c in C:
-        # Für j = 1
-        model += u[1, k, c] <= U_0[k, c] + x[1, k], f"StateInit_Hold1_k{k}_c{c}"
-        model += u[1, k, c] >= U_0[k, c] - x[1, k], f"StateInit_Hold2_k{k}_c{c}"
+        # --- Zielfunktion ---
+        model += pulp.lpSum(y[j, k] for j in J for k in K), "Gesamtzahl_Kartenwechsel"
 
-        # Für j > 1
+        # --- Nebenbedingungen ---
+
+        # A. Eindeutige Job-Zuweisung: Jeder Job genau eine Kiste
         for j in J:
-            if j > 1:
-                model += u[j, k, c] <= u[j - 1, k, c] + x[j, k], f"State_Hold1_j{j}_k{k}_c{c}"
-                model += u[j, k, c] >= u[j - 1, k, c] - x[j, k], f"State_Hold2_j{j}_k{k}_c{c}"
+            model += pulp.lpSum(x[j, k] for k in K) == 1, f"Assign_Job_{j}"
 
-# ==========================================
-# E. Aktivierung der Kartenwechsel-Strafe (y_j,k)
-# ==========================================
+        # B. Kapazität & Zeitkonflikte (Überlappungssperre)
+        for k in K:
+            for (j1, j2) in O:
+                model += x[j1, k] + x[j2, k] <= 1, f"Overlap_k{k}_j{j1}_j{j2}"
 
-for k in K:
-    # Für j = 1
-    model += y[1, k] >= x[1, k] - U_0[k, c_job[1]], f"Penalty_j1_k{k}"
+        # ==========================================
+        # C. Sequentielle Zustandsverfolgung (state_j,k) + Abweichungserkennung (d_j,k)
+        # ==========================================
 
-    # Für j > 1
-    for j in J:
-        if j > 1:
-            model += y[j, k] >= x[j, k] - u[j - 1, k, c_job[j]], f"Penalty_j{j}_k{k}"
-# ==========================================
-# 4. LÖSUNG DES MODELLS
-# ==========================================
+        for k in K:
+            for j in J:
+                prev = initial_code[k] if j == 1 else state[j - 1, k]
 
-solver = pulp.PULP_CBC_CMD(msg=False)
-status = model.solve(solver)
+                # state[j,k] = Kunde von Job j, falls Kiste k dafür genutzt wird,
+                # sonst bleibt der vorherige Zustand erhalten.
+                model += state[j, k] <= c_code[c_job[j]] + big_m * (1 - x[j, k]), f"State_Use1_j{j}_k{k}"
+                model += state[j, k] >= c_code[c_job[j]] - big_m * (1 - x[j, k]), f"State_Use2_j{j}_k{k}"
+                model += state[j, k] <= prev + big_m * x[j, k], f"State_Hold1_j{j}_k{k}"
+                model += state[j, k] >= prev - big_m * x[j, k], f"State_Hold2_j{j}_k{k}"
 
-# ==========================================
-# 5. ERGEBNISAUSGABE
-# ==========================================
+                # d[j,k] = 1, sobald der Zustand vor Job j nicht zu dessen Kunde passt
+                model += prev - c_code[c_job[j]] <= big_m * d[j, k], f"Diff1_j{j}_k{k}"
+                model += c_code[c_job[j]] - prev <= big_m * d[j, k], f"Diff2_j{j}_k{k}"
 
-print(f"Status der Optimierung: {pulp.LpStatus[status]}")
-print(f"Minimale Anzahl Kartenwechsel gesamt: {int(pulp.value(model.objective))}\n")
+        # ==========================================
+        # D. Aktivierung der Kartenwechsel-Strafe (y_j,k = x_j,k AND d_j,k)
+        # ==========================================
 
-# Tabellarische Auswertung
-schedule = []
-for j in J:
-    assigned_box = [k for k in K if pulp.value(x[j, k]) > 0.5][0]
-    card_change = int(pulp.value(y[j, assigned_box]))
+        for k in K:
+            for j in J:
+                model += y[j, k] >= x[j, k] + d[j, k] - 1, f"Penalty_j{j}_k{k}"
 
-    # Ermittlung des Vorzustands für die Ausgabe
-    if j == 1:
-        prev_card = initial_state[assigned_box]
-    else:
-        prev_card = [c for c in C if pulp.value(u[j - 1, assigned_box, c]) > 0.5][0]
+        # ==========================================
+        # 4. LÖSUNG DES MODELLS
+        # ==========================================
 
-    schedule.append({
-        "Job ID": job_dict[j]["id"],
-        "Start": f"{S[j] // 60:02d}:{S[j] % 60:02d}",
-        "Ende": f"{E[j] // 60:02d}:{E[j] % 60:02d}",
-        "Kunde": c_job[j],
-        "Zugewiesene Kiste": assigned_box,
-        "Karte Vorher": prev_card,
-        "Kartenwechsel nötig?": "JA" if card_change == 1 else "Nein"
-    })
+        solver = pulp.PULP_CBC_CMD(msg=True)
 
-df_schedule = pd.DataFrame(schedule)
-print(df_schedule.to_string(index=False))
+
+        model.solve(solver)
+
+        # ==========================================
+        # 5. ERGEBNIS: NUR self.orders ZURÜCKSCHREIBEN
+        # ==========================================
+
+        crate_by_id = {crate.id: crate for crate in crates}
+        assign_order_ids = {order.id for order in self.orders}
+
+        for j in J:
+            order_id = job_dict[j]["id"]
+            if order_id not in assign_order_ids:
+                continue
+            assigned_box = [k for k in K if pulp.value(x[j, k]) > 0.5][0]
+            current_order = order_by_id[order_id]
+            current_order.crate = crate_by_id[assigned_box]
+            self.session.add(current_order)
