@@ -1,5 +1,3 @@
-from datetime import timedelta
-
 import pulp
 
 from sqlmodel import select, desc
@@ -41,7 +39,7 @@ class MilpAssigner(AssignmentServiceInterface):
             self.session.exec(
                 select(Order)
                 .where(Order.delivery_date > self.assign_date )
-                .where(Order.delivery_date< self.assign_date+timedelta(days=5))
+                .where(Order.delivery_date< self.assign_date)
                 .where(Order.deleted == False)
             ).all()
         )
@@ -101,17 +99,11 @@ class MilpAssigner(AssignmentServiceInterface):
         E = {j: job_dict[j]["end"] for j in J}
         c_job = {j: job_dict[j]["customer"] for j in J}
 
-        # Kundencodes: 0 = keine Karte/leere Kiste, 1..|C| = tatsächliche Kunden.
-        # Ersetzt die frühere One-Hot-Matrix U_0 (Kiste x Kunde) durch einen
-        # einzelnen Code pro Kiste - das ist der Schlüssel zur Verkleinerung
-        # des Modells weiter unten (siehe state[j,k]).
-        c_code = {c: idx + 1 for idx, c in enumerate(C)}
-        big_m = max(len(C), 1)  # deckt den vollen Wertebereich der Codes ab
-
-        initial_code = {
-            k: c_code[initial_state[k]] if k in initial_state else 0
-            for k in K
-        }
+        # Binäre Matrix U_0
+        U_0 = {}
+        for k in K:
+            for c in C:
+                U_0[k, c] = 1 if initial_state.get(k) == c else 0
 
         # Erzeugung des Überlappungsgraphen O
         O = []
@@ -129,15 +121,7 @@ class MilpAssigner(AssignmentServiceInterface):
         # --- Entscheidungsvariablen ---
         x = pulp.LpVariable.dicts("x", [(j, k) for j in J for k in K], cat=pulp.LpBinary)
         y = pulp.LpVariable.dicts("y", [(j, k) for j in J for k in K], cat=pulp.LpBinary)
-        # state[j,k]: Kundencode, der nach Job j auf Kiste k "klebt". Da dieser
-        # Wert durch x eindeutig festgelegt wird, genügt EINE kontinuierliche
-        # Variable pro (j,k) statt eines binären u[j,k,c] pro Kunde c - das
-        # spart einen Faktor |C| an Variablen und Nebenbedingungen.
-        state = pulp.LpVariable.dicts(
-            "state", [(j, k) for j in J for k in K], lowBound=0, upBound=big_m, cat=pulp.LpContinuous
-        )
-        # d[j,k] = 1, falls der Kundencode vor Job j von dessen Kunde abweicht
-        d = pulp.LpVariable.dicts("d", [(j, k) for j in J for k in K], cat=pulp.LpBinary)
+        u = pulp.LpVariable.dicts("u", [(j, k, c) for j in J for k in K for c in C], cat=pulp.LpBinary)
 
         # --- Zielfunktion ---
         model += pulp.lpSum(y[j, k] for j in J for k in K), "Gesamtzahl_Kartenwechsel"
@@ -153,40 +137,54 @@ class MilpAssigner(AssignmentServiceInterface):
             for (j1, j2) in O:
                 model += x[j1, k] + x[j2, k] <= 1, f"Overlap_k{k}_j{j1}_j{j2}"
 
-        # ==========================================
-        # C. Sequentielle Zustandsverfolgung (state_j,k) + Abweichungserkennung (d_j,k)
-        # ==========================================
-
-        for k in K:
-            for j in J:
-                prev = initial_code[k] if j == 1 else state[j - 1, k]
-
-                # state[j,k] = Kunde von Job j, falls Kiste k dafür genutzt wird,
-                # sonst bleibt der vorherige Zustand erhalten.
-                model += state[j, k] <= c_code[c_job[j]] + big_m * (1 - x[j, k]), f"State_Use1_j{j}_k{k}"
-                model += state[j, k] >= c_code[c_job[j]] - big_m * (1 - x[j, k]), f"State_Use2_j{j}_k{k}"
-                model += state[j, k] <= prev + big_m * x[j, k], f"State_Hold1_j{j}_k{k}"
-                model += state[j, k] >= prev - big_m * x[j, k], f"State_Hold2_j{j}_k{k}"
-
-                # d[j,k] = 1, sobald der Zustand vor Job j nicht zu dessen Kunde passt
-                model += prev - c_code[c_job[j]] <= big_m * d[j, k], f"Diff1_j{j}_k{k}"
-                model += c_code[c_job[j]] - prev <= big_m * d[j, k], f"Diff2_j{j}_k{k}"
+        # C. Eindeutigkeit des Zustandscodes
+        for j in J:
+            for k in K:
+                model += pulp.lpSum(u[j, k, c] for c in C) == 1, f"SingleState_j{j}_k{k}"
 
         # ==========================================
-        # D. Aktivierung der Kartenwechsel-Strafe (y_j,k = x_j,k AND d_j,k)
+        # D. Sequentielle Zustandsverfolgung (u_j,k,c)
         # ==========================================
 
         for k in K:
-            for j in J:
-                model += y[j, k] >= x[j, k] + d[j, k] - 1, f"Penalty_j{j}_k{k}"
+            # --- 1. Neuzuweisung bei Nutzung (hängt nur von j und k ab) ---
+            # Für j = 1
+            model += u[1, k, c_job[1]] >= x[1, k], f"StateInit_Use_k{k}"
 
+            # Für j > 1
+            for j in J:
+                if j > 1:
+                    model += u[j, k, c_job[j]] >= x[j, k], f"State_Use_j{j}_k{k}"
+
+            # --- 2. Zustandserhalt bei Nicht-Nutzung (hängt von j, k UND c ab) ---
+            for c in C:
+                # Für j = 1
+                model += u[1, k, c] <= U_0[k, c] + x[1, k], f"StateInit_Hold1_k{k}_c{c}"
+                model += u[1, k, c] >= U_0[k, c] - x[1, k], f"StateInit_Hold2_k{k}_c{c}"
+
+                # Für j > 1
+                for j in J:
+                    if j > 1:
+                        model += u[j, k, c] <= u[j - 1, k, c] + x[j, k], f"State_Hold1_j{j}_k{k}_c{c}"
+                        model += u[j, k, c] >= u[j - 1, k, c] - x[j, k], f"State_Hold2_j{j}_k{k}_c{c}"
+
+        # ==========================================
+        # E. Aktivierung der Kartenwechsel-Strafe (y_j,k)
+        # ==========================================
+
+        for k in K:
+            # Für j = 1
+            model += y[1, k] >= x[1, k] - U_0[k, c_job[1]], f"Penalty_j1_k{k}"
+
+            # Für j > 1
+            for j in J:
+                if j > 1:
+                    model += y[j, k] >= x[j, k] - u[j - 1, k, c_job[j]], f"Penalty_j{j}_k{k}"
         # ==========================================
         # 4. LÖSUNG DES MODELLS
         # ==========================================
 
         solver = pulp.PULP_CBC_CMD(msg=True)
-
-
         model.solve(solver)
 
         # ==========================================
