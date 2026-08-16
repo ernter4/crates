@@ -31,7 +31,7 @@ def create_weekly(data: WeeklyOrderCreate, session: SessionDep, current_user: Cu
 @router.get("/{item_id}", operation_id=f"{resource_name}_get")
 def get( item_id: int, session: SessionDep, current_user: CurrentUserDep) ->  OrderWithID:
     try:
-        OrderService(session, current_user).get(item_id)
+       return  OrderService(session, current_user).get(item_id)
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
 @router.put("/{item_id}", operation_id=f"{resource_name}_put")

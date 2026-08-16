@@ -100,4 +100,5 @@ class WeeklyOrderCreate(SQLModel):
     wednesday: list[int] = Field(default_factory=list)
     thursday: list[int] = Field(default_factory=list)
     friday: list[int] = Field(default_factory=list)
+    saturday: list[int] = Field(default_factory=list)
     sunday: list[int] = Field(default_factory=list)

@@ -25,7 +25,7 @@ class OrderService(ModelService[Order,OrderCreate,Order,OrderWithID]):
         if data.date.weekday() != 0:
             raise ValueError("date muss ein Montag sein.")
 
-        menu_ids_by_offset = [data.monday, data.tuesday, data.wednesday, data.thursday, data.friday,data.sunday
+        menu_ids_by_offset = [data.monday, data.tuesday, data.wednesday, data.thursday, data.friday,data.saturday,data.sunday
                               ]
 
         created: list[OrderWithID] = []
