@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.2](https://github.com/ernter4/crates/compare/v0.12.1...v0.12.2) (2026-08-16)
+
+
+### Bug Fixes
+
+* fixed weekly create ([c1a3476](https://github.com/ernter4/crates/commit/c1a3476ecf1d2a02ee520dedad5466c3e5939627))
+
 ## [0.12.1](https://github.com/ernter4/crates/compare/v0.12.0...v0.12.1) (2026-08-16)
 
 
