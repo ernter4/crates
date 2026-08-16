@@ -1,10 +1,10 @@
-from datetime import  datetime,time
+from datetime import  datetime,time, timedelta
 from typing import Generic, TypeVar, Type, Any, Optional
 
 from anyio import current_effective_deadline
 from sqlmodel import SQLModel, Session, select, and_, or_
 
-from app.ordering.models import OrderCreate, Order, OrderWithID, OrderHistory, OrderBase
+from app.ordering.models import OrderCreate, Order, OrderWithID, OrderHistory, OrderBase, WeeklyOrderCreate
 from app.shared.ModelService import ModelService, TUpdate, Tout, TCreate
 from app.shared.models import User
 from app.accounting.models import Customer
@@ -20,6 +20,26 @@ class OrderService(ModelService[Order,OrderCreate,Order,OrderWithID]):
     def create(self, data: TCreate) -> Tout:
         self.check_for_overlap(Order.model_validate(data))
         return super().create(data)
+
+    def create_weekly(self, data: WeeklyOrderCreate) -> list[OrderWithID]:
+        if data.date.weekday() != 0:
+            raise ValueError("date muss ein Montag sein.")
+
+        menu_ids_by_offset = [data.monday, data.tuesday, data.wednesday, data.thursday, data.friday,data.sunday
+                              ]
+
+        created: list[OrderWithID] = []
+        for offset, menu_ids in enumerate(menu_ids_by_offset):
+            delivery_date = data.date + timedelta(days=offset)
+            for menu_id in menu_ids:
+                order = OrderCreate(
+                    customer_id=data.customer_id,
+                    delivery_date=delivery_date,
+                    menu_id=menu_id,
+                    crate_id=None,
+                )
+                created.append(self.create(order))
+        return created
 
 
 

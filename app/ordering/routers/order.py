@@ -1,10 +1,10 @@
 from datetime import date
-from typing import Annotated
+from typing import Annotated, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import SQLModel
 
-from app.ordering.models import OrderCreate, OrderWithID, OrderFilter, get_order_filter_query, Order
+from app.ordering.models import OrderCreate, OrderWithID, OrderFilter, get_order_filter_query, Order, WeeklyOrderCreate
 from app.ordering.services.models.order import OrderService
 from app.shared.ModelRouter import BaseRouter
 from app.shared.dependencies import SessionDep, CurrentUserDep
@@ -21,10 +21,19 @@ def create(data: OrderCreate, session: SessionDep, current_user: CurrentUserDep)
         return OrderService(session, current_user).create(data)
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
+@router.post("/weekly", operation_id=f"{resource_name}_post_weekly")
+def create_weekly(data: WeeklyOrderCreate, session: SessionDep, current_user: CurrentUserDep) -> list[OrderWithID]:
+    try:
+        return OrderService(session, current_user).create_weekly(data)
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+
 @router.get("/{item_id}", operation_id=f"{resource_name}_get")
 def get( item_id: int, session: SessionDep, current_user: CurrentUserDep) ->  OrderWithID:
-    return OrderService(session, current_user).get(item_id)
-
+    try:
+        return OrderService(session, current_user).get(item_id)
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
 @router.put("/{item_id}", operation_id=f"{resource_name}_put")
 def update( item_id:int,data: OrderWithID, session: SessionDep, current_user: CurrentUserDep)-> OrderWithID:
     try:

@@ -57,15 +57,18 @@ class OrderHistory(OrderBase,table=True):
 class OrderFilter(CustomSQLModel):
     customer_id:Optional[int] = None
     crate_id:Optional[int] = None
+    crate_id_exists:Optional[bool] = None
     delivery_date:Optional[date] = None
     return_date_exists:Optional[bool] = None
     delivery_date_gte:Optional[date] = None
     delivery_date_lte:Optional[date] = None
     deleted:Optional[bool] = None
 
+
 def get_order_filter_query(
     customer_id: Optional[int] = None,
     crate_id: Optional[int] = None,
+    crate_id_exists: Optional[bool] = None,
     delivery_date: Optional[date] = None,
     return_date_exists: Optional[bool] = None,
     delivery_date_gte: Optional[date] = None,
@@ -79,9 +82,22 @@ deleted:Optional[bool] = None
         delivery_date_gte = delivery_date_gte,
         delivery_date_lte = delivery_date_lte,
         return_date_exists=return_date_exists,
-        deleted= deleted
+        deleted= deleted,
+        crate_id_exists=crate_id_exists
     )
 
 class AssignmentChanges(SQLModel):
     order: Order
     old_customer: "Customer"
+
+
+class WeeklyOrderCreate(SQLModel):
+    customer_id: int
+    date: date
+
+    monday: list[int] = Field(default_factory=list)
+    tuesday: list[int] = Field(default_factory=list)
+    wednesday: list[int] = Field(default_factory=list)
+    thursday: list[int] = Field(default_factory=list)
+    friday: list[int] = Field(default_factory=list)
+    sunday: list[int] = Field(default_factory=list)
