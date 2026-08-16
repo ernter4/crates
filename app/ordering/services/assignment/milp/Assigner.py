@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 import pulp
 
 from sqlmodel import select, desc
@@ -38,8 +40,8 @@ class MilpAssigner(AssignmentServiceInterface):
         future_orders = list(
             self.session.exec(
                 select(Order)
-                .where(Order.delivery_date > self.assign_date )
-                .where(Order.delivery_date< self.assign_date)
+               .where(Order.delivery_date > self.assign_date )
+                .where(Order.delivery_date< self.assign_date + timedelta(days=4))
                 .where(Order.deleted == False)
             ).all()
         )
@@ -56,6 +58,7 @@ class MilpAssigner(AssignmentServiceInterface):
                 select(Order)
                 .where(Order.crate_id == crate.id)
                 .where(Order.delivery_date < self.assign_date)
+                .where(Order.deleted == False)
                 .order_by(desc(Order.delivery_date))
             ).first()
             if last_order is not None:
@@ -123,6 +126,14 @@ class MilpAssigner(AssignmentServiceInterface):
         y = pulp.LpVariable.dicts("y", [(j, k) for j in J for k in K], cat=pulp.LpBinary)
         u = pulp.LpVariable.dicts("u", [(j, k, c) for j in J for k in K for c in C], cat=pulp.LpBinary)
 
+        # --- Warmstart ---
+        x_start = self.get_warm_start(J, K, C, S, E, c_job, U_0)
+        for (j, k) in x_start:
+            x[j, k].setInitialValue(1)
+            for alternatek in K:
+                if alternatek != k:
+                    x[j, alternatek].setInitialValue(0)
+
         # --- Zielfunktion ---
         model += pulp.lpSum(y[j, k] for j in J for k in K), "Gesamtzahl_Kartenwechsel"
 
@@ -184,7 +195,7 @@ class MilpAssigner(AssignmentServiceInterface):
         # 4. LÖSUNG DES MODELLS
         # ==========================================
 
-        solver = pulp.PULP_CBC_CMD(msg=True)
+        solver = pulp.PULP_CBC_CMD(msg=True, warmStart=True)
         model.solve(solver)
 
         # ==========================================
@@ -200,5 +211,58 @@ class MilpAssigner(AssignmentServiceInterface):
                 continue
             assigned_box = [k for k in K if pulp.value(x[j, k]) > 0.5][0]
             current_order = order_by_id[order_id]
-            current_order.crate = crate_by_id[assigned_box]
+            current_order.assigned_crate_id = assigned_box
             self.session.add(current_order)
+            self.session.commit()
+
+    def get_warm_start(self, J, K, C, S, E, c_job, U_0):
+        """
+        Erzeugt eine heuristische Startlösung (Warmstart) für die x-Variablen
+        des MILP-Solvers.
+
+        Analog zur "perfect crate"-Logik des GreedyAssigner (siehe
+        `greedy.Assigner.GreedyAssigner.assign`) wird für jeden Job die Kiste
+        gesucht, auf der zuletzt die Karte desselben Kunden klebte. Dafür
+        wird Tag für Tag (chronologisch, wie in `J` sortiert) durch die Jobs
+        iteriert und der Kistenzustand mitgeführt.
+
+        Es wird nur bei einem echten "perfect crate"-Treffer ein Startwert
+        vorgegeben: die Kiste muss frei sein und dabei höchstens 1 Tag
+        ungenutzt geblieben sein. Andernfalls bekommt der Job keinen
+        Startwert (kein Ausweichen auf eine andere Kiste).
+
+        Zurückgegeben wird nur die Menge der (j, k), die belegt werden
+        sollen (x_jk = 1) - nicht die vollständige, mit Nullen aufgefüllte
+        Matrix.
+        """
+        # Zustand je Kiste: Kunde, dessen Karte aktuell klebt, und Tag, ab
+        # dem die Kiste wieder frei ist (None = Zustand vor `assign_date`,
+        # Leerstandsdauer unbekannt).
+        current_customer = {k: None for k in K}
+        free_from = {k: None for k in K}
+        for k in K:
+            for c in C:
+                if U_0.get((k, c)) == 1:
+                    current_customer[k] = c
+
+        x_start = {}
+
+        for j in J:  # J ist bereits chronologisch (Tag für Tag) sortiert
+            day = S[j]
+            customer = c_job[j]
+
+            chosen = None
+            for k in K:
+                if current_customer[k] != customer:
+                    continue
+                if free_from[k] is not None and not (free_from[k] <= day <= free_from[k] + 1):
+                    continue
+                chosen = k
+                break
+
+            if chosen is not None:
+                x_start[j, chosen] = 1
+                current_customer[chosen] = customer
+                free_from[chosen] = E[j]
+
+        return x_start

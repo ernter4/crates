@@ -84,3 +84,8 @@ dependencies = [
     "websockets==16.0",
     "xmlschema==4.3.1",
 ]
+
+[dependency-groups]
+test = [
+    "pytest>=9.1.1",
+]
