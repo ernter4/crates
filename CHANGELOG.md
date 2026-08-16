@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.0](https://github.com/ernter4/crates/compare/v0.11.0...v0.12.0) (2026-08-16)
+
+
+### Features
+
+* added weekly order ([5a7cda7](https://github.com/ernter4/crates/commit/5a7cda768ed2a7905b235650f919b0813f6fb1f7))
+
 ## [0.11.0](https://github.com/ernter4/crates/compare/v0.10.0...v0.11.0) (2026-07-02)
 
 
