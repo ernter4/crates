@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.1](https://github.com/ernter4/crates/compare/v0.12.0...v0.12.1) (2026-08-16)
+
+
+### Bug Fixes
+
+* fixed customer get ([e8b054d](https://github.com/ernter4/crates/commit/e8b054dbb2f1f8e759941d5b0f8278b1ef384082))
+
 ## [0.12.0](https://github.com/ernter4/crates/compare/v0.11.0...v0.12.0) (2026-08-16)
 
 
