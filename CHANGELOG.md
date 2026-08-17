@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.13.0](https://github.com/ernter4/crates/compare/v0.12.2...v0.13.0) (2026-08-17)
+
+
+### Features
+
+* added last changed ([0cdc3ba](https://github.com/ernter4/crates/commit/0cdc3ba79e8a91bd73b8f3749a5f5a3aa3142764))
+
+
+### Bug Fixes
+
+* added migration ([33584af](https://github.com/ernter4/crates/commit/33584afc6baf380e805c832cc2d91c23e282512a))
+* added sorting ([b629785](https://github.com/ernter4/crates/commit/b62978596ffe64ff607dfce16ee980b4fb01c85c))
+
 ## [0.12.2](https://github.com/ernter4/crates/compare/v0.12.1...v0.12.2) (2026-08-16)
 
 
