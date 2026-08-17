@@ -15,10 +15,11 @@ class OrderService(ModelService[Order,OrderCreate,Order,OrderWithID]):
         super().__init__(session, Order,OrderWithID,current_user= current_user)
     def update(self, data: OrderWithID,item_id: Optional[int] = None) -> OrderWithID:
         self.check_for_overlap(Order.model_validate(data))
-
+        data.last_changed = datetime.now()
         return super().update(data,item_id)
     def create(self, data: TCreate) -> Tout:
         self.check_for_overlap(Order.model_validate(data))
+        data.last_changed = datetime.now()
         return super().create(data)
 
     def create_weekly(self, data: WeeklyOrderCreate) -> list[OrderWithID]:

@@ -16,6 +16,7 @@ class OrderBase(CustomSQLModel):
     predicted_return_date : Optional[date] = None
     return_date : Optional[datetime] = None
     assigned_crate_id : Optional[int] =Field(foreign_key="crate.id",ondelete="RESTRICT")
+    last_changed:datetime
     menu_id : int
     description:Optional[str] =None
     crate_id : Optional[int] =Field(foreign_key="crate.id",ondelete="RESTRICT")
@@ -63,7 +64,7 @@ class OrderFilter(CustomSQLModel):
     delivery_date_gte:Optional[date] = None
     delivery_date_lte:Optional[date] = None
     deleted:Optional[bool] = None
-
+    menu_id:Optional[int] = None
 
 def get_order_filter_query(
     customer_id: Optional[int] = None,
@@ -73,6 +74,7 @@ def get_order_filter_query(
     return_date_exists: Optional[bool] = None,
     delivery_date_gte: Optional[date] = None,
     delivery_date_lte: Optional[date] = None,
+    menu_id: Optional[int] = None,
 deleted:Optional[bool] = None
 ) -> OrderFilter:
     return OrderFilter(
@@ -83,7 +85,8 @@ deleted:Optional[bool] = None
         delivery_date_lte = delivery_date_lte,
         return_date_exists=return_date_exists,
         deleted= deleted,
-        crate_id_exists=crate_id_exists
+        crate_id_exists=crate_id_exists,
+        menu_id=menu_id
     )
 
 class AssignmentChanges(SQLModel):
