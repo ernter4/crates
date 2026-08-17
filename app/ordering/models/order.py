@@ -16,7 +16,7 @@ class OrderBase(CustomSQLModel):
     predicted_return_date : Optional[date] = None
     return_date : Optional[datetime] = None
     assigned_crate_id : Optional[int] =Field(foreign_key="crate.id",ondelete="RESTRICT")
-    last_changed:datetime
+    last_changed:Optional[datetime] = datetime.now()
     menu_id : int
     description:Optional[str] =None
     crate_id : Optional[int] =Field(foreign_key="crate.id",ondelete="RESTRICT")
