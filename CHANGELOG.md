@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.14.0](https://github.com/ernter4/crates/compare/v0.13.0...v0.14.0) (2026-08-20)
+
+
+### Features
+
+* added assignment ([aa64e78](https://github.com/ernter4/crates/commit/aa64e783e8ac4ff30507b23e95d6873f050849ef))
+* deleted filter to assignment and overlap search ([c1b1f69](https://github.com/ernter4/crates/commit/c1b1f69dee4a75d258c393289d1bcc9500ea8306))
+
 ## [0.13.0](https://github.com/ernter4/crates/compare/v0.12.2...v0.13.0) (2026-08-17)
 
 
