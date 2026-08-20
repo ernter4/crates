@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.3](https://github.com/ernter4/crates/compare/v0.14.2...v0.14.3) (2026-08-20)
+
+
+### Bug Fixes
+
+* fixed_background issues ([8a28319](https://github.com/ernter4/crates/commit/8a283192d3c1be6af1636c2719018aee1fbe78d3))
+
 ## [0.14.2](https://github.com/ernter4/crates/compare/v0.14.1...v0.14.2) (2026-08-20)
 
 
