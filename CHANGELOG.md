@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.2](https://github.com/ernter4/crates/compare/v0.14.1...v0.14.2) (2026-08-20)
+
+
+### Bug Fixes
+
+* added lock ([ddcd50a](https://github.com/ernter4/crates/commit/ddcd50a08f4503082a4b90677c18c61c6afb0397))
+
 ## [0.14.1](https://github.com/ernter4/crates/compare/v0.14.0...v0.14.1) (2026-08-20)
 
 
