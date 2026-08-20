@@ -25,6 +25,7 @@ dependencies = [
     "fastar==0.8.0",
     "fonttools==4.61.1",
     "greenlet==3.3.0",
+    "gurobipy>=13.0.2",
     "h11==0.16.0",
     "httpcore==1.0.9",
     "httptools==0.7.1",

@@ -41,7 +41,7 @@ class MilpAssigner(AssignmentServiceInterface):
             self.session.exec(
                 select(Order)
                .where(Order.delivery_date > self.assign_date )
-                .where(Order.delivery_date< self.assign_date + timedelta(days=4))
+                .where(Order.delivery_date< self.assign_date + timedelta(days=5))
                 .where(Order.deleted == False)
             ).all()
         )
@@ -125,8 +125,7 @@ class MilpAssigner(AssignmentServiceInterface):
         x = pulp.LpVariable.dicts("x", [(j, k) for j in J for k in K], cat=pulp.LpBinary)
         y = pulp.LpVariable.dicts("y", [(j, k) for j in J for k in K], cat=pulp.LpBinary)
         u = pulp.LpVariable.dicts("u", [(j, k, c) for j in J for k in K for c in C], cat=pulp.LpBinary)
-
-        # --- Warmstart ---
+                      # --- Warmstart ---
         x_start = self.get_warm_start(J, K, C, S, E, c_job, U_0)
         for (j, k) in x_start:
             x[j, k].setInitialValue(1)
@@ -195,7 +194,7 @@ class MilpAssigner(AssignmentServiceInterface):
         # 4. LÖSUNG DES MODELLS
         # ==========================================
 
-        solver = pulp.PULP_CBC_CMD(msg=True, warmStart=True)
+        solver = pulp.GUROBI(msg=True, warmStart=True)
         model.solve(solver)
 
         # ==========================================

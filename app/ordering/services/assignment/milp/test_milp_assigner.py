@@ -11,7 +11,7 @@ from app.ordering.models import Crate, Order
 from app.ordering.services.assignment.milp.Assigner import MilpAssigner
 from app.shared.database import engine
 
-ASSIGN_DATE = date(2026, 7, 1)
+ASSIGN_DATE = date(2026, 6, 8)
 
 
 def test_milp_assigner():

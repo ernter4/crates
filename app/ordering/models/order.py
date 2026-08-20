@@ -1,6 +1,7 @@
 from datetime import date, datetime
 from typing import Optional, TYPE_CHECKING
 
+from pyasn1.type.univ import Boolean
 from sqlalchemy import text
 from sqlmodel import Field, Relationship, SQLModel
 
@@ -89,10 +90,10 @@ deleted:Optional[bool] = None
         menu_id=menu_id
     )
 
-class AssignmentChanges(SQLModel):
-    order: Order
-    old_customer: "Customer"
-
+class Assignment(SQLModel):
+    order:OrderWithID
+    card_swap:bool
+    card_turn:bool
 
 class WeeklyOrderCreate(SQLModel):
     customer_id: int
