@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.1](https://github.com/ernter4/crates/compare/v0.14.0...v0.14.1) (2026-08-20)
+
+
+### Bug Fixes
+
+* moved gurobi to test ([e0e0f6b](https://github.com/ernter4/crates/commit/e0e0f6b4f0da00f6a319ef9ffa51114105e724dd))
+
 ## [0.14.0](https://github.com/ernter4/crates/compare/v0.13.0...v0.14.0) (2026-08-20)
 
 
