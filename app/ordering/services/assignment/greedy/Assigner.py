@@ -20,10 +20,12 @@ class GreedyAssigner(AssignmentServiceInterface):
             .where(
                 or_(and_(Order.crate_id == Crate.id,
                          Order.return_date == None
+
                          ),
                     and_(Order.assigned_crate_id == Crate.id,
                          Order.delivery_date == self.assign_date))
             )
+            .where(Order.deleted == False)
             .correlate(Crate)
             .exists()
         )

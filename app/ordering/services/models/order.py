@@ -49,7 +49,7 @@ class OrderService(ModelService[Order,OrderCreate,Order,OrderWithID]):
         ## without crate there is no overlap
         if current_order.crate is None:
             return
-        statement = select(Order).where(Order.crate_id == current_order.crate_id).where( Order.id != current_order.id)
+        statement = select(Order).where(Order.crate_id == current_order.crate_id).where( Order.id != current_order.id).where(Order.deleted == False)
         overlap :list[Order]= []
         if current_order.return_date is None:
             bad_order = self.session.exec(statement.where(Order.return_date == None)).first()
