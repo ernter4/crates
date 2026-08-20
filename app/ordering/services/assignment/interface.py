@@ -47,6 +47,6 @@ class AssignmentServiceInterface:
         customers: list[CustomerWithID] = []
         for assignment in self.get_Assignment():
             if assignment.card_swap:
-                customers.append(cast(CustomerWithID, cast(BaseCustomer, assignment.order.customer)))
+                customers.append(self.session.get(Customer, assignment.order.customer_id))
 
         return customers
