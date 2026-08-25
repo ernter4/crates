@@ -19,7 +19,7 @@ dependencies = [
     "sentry-sdk==2.50.0",
     "sepaxml==2.7.0",
     "sqlalchemy==2.0.46",
-    "sqlmodel==0.0.31",
+    "sqlmodel==0.0.39",
     "uvicorn==0.52.4",
 ]
 
