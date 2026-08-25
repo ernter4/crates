@@ -15,7 +15,7 @@ dependencies = [
     "pulp>=3.3.2",
     "pydantic==2.13.4",
     "python-dotenv==1.2.1",
-    "schwifty==2026.1.0",
+    "schwifty==2026.7.3",
     "sentry-sdk==2.68.0",
     "sepaxml==2.7.0",
     "sqlalchemy==2.0.52",
