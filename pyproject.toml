@@ -14,7 +14,7 @@ dependencies = [
     "pillow==12.1.1",
     "pulp>=3.3.2",
     "pydantic==2.12.5",
-    "python-dotenv==1.2.1",
+    "python-dotenv==1.2.3",
     "schwifty==2026.1.0",
     "sentry-sdk==2.50.0",
     "sepaxml==2.7.0",
