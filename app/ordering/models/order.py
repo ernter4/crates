@@ -2,8 +2,8 @@ from datetime import date, datetime
 from typing import Optional, TYPE_CHECKING
 
 from pyasn1.type.univ import Boolean
-from sqlalchemy import text
-from sqlmodel import Field, Relationship, SQLModel
+
+from sqlmodel import Field, Relationship, SQLModel,text
 
 from app.shared.models import CustomSQLModel, ModelWithId
 from app.accounting.models import Customer
