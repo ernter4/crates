@@ -23,7 +23,7 @@ dependencies = [
     "fastapi-cli==0.0.20",
     "fastapi-cloud-cli==0.11.0",
     "fastar==0.8.0",
-    "fonttools==4.61.1",
+    "fonttools==4.63.0",
     "greenlet==3.3.0",
 
     "h11==0.16.0",
