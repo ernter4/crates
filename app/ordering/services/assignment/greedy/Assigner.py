@@ -1,3 +1,5 @@
+
+from datetime import timedelta,datetime,time
 from os import waitid_result
 
 from sqlmodel import select, exists, func, desc, and_, or_
@@ -15,8 +17,8 @@ class GreedyAssigner(AssignmentServiceInterface):
             select(Order.id)
             .where(
                 or_(and_(Order.crate_id == Crate.id,
-                         Order.return_date == None
-
+                         or_(Order.return_date == None,
+                             Order.return_date >= datetime.combine(self.assign_date,time.min) + timedelta(hours=8))
                          ),
                     and_(Order.assigned_crate_id == Crate.id,
                          Order.delivery_date == self.assign_date))

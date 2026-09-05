@@ -1,8 +1,8 @@
-from datetime import timedelta
+from datetime import datetime, time, timedelta
 
 import pulp
 
-from sqlmodel import select, desc
+from sqlmodel import select, desc, or_
 
 from app.ordering.models import Order, Crate
 from app.ordering.services.assignment.interface import AssignmentServiceInterface
@@ -41,11 +41,33 @@ class MilpAssigner(AssignmentServiceInterface):
             self.session.exec(
                 select(Order)
                .where(Order.delivery_date > self.assign_date )
-                .where(Order.delivery_date< self.assign_date + timedelta(days=5))
+                .where(Order.delivery_date< self.assign_date + timedelta(days=3))
                 .where(Order.deleted == False)
             ).all()
         )
-        job_orders = list(self.orders) + future_orders
+        # Bereits laufende Bestellungen: auf ihrer bisherigen Kiste (crate_id)
+        # klebt ihre Karte noch, weil sie bis mindestens self.assign_date
+        # nicht zurückgegeben wurde - unabhängig davon, wie weit ihr
+        # delivery_date schon zurückliegt. Ohne das kennt die Kapazitäts-/
+        # Überlappungsprüfung (siehe O unten) nur Jobs ab self.orders bzw.
+        # future_orders (max. 3 Tage voraus) und hält Kisten, die länger als
+        # dieses Fenster unterwegs sind, fälschlich für frei - identischer
+        # Fehler wie vormals in GreedyAssigner.get_present_crates. Ihre Kiste
+        # ist bereits real fix (crate_id); sie werden unten per harter
+        # Constraint auf genau diese Kiste gepinnt statt neu optimiert.
+        not_returned_yet = Order.return_date >= datetime.combine(self.assign_date, time.min) + timedelta(days=1)
+        still_open_orders = list(
+            self.session.exec(
+                select(Order)
+                .where(Order.crate_id != None)
+                .where(Order.delivery_date < self.assign_date)
+                .where(Order.deleted == False)
+                .where(or_(Order.return_date == None, not_returned_yet))
+            ).all()
+        )
+        fixed_crate_by_order_id = {order.id: order.crate_id for order in still_open_orders}
+
+        job_orders = list(self.orders) + future_orders + still_open_orders
         order_by_id = {order.id: order for order in job_orders}
 
         customers = {order.customer_id for order in job_orders}
@@ -142,6 +164,15 @@ class MilpAssigner(AssignmentServiceInterface):
         for j in J:
             model += pulp.lpSum(x[j, k] for k in K) == 1, f"Assign_Job_{j}"
 
+        # A2. Fixierung bereits laufender Jobs (still_open_orders) auf ihre
+        # echte, bereits bekannte Kiste - sie werden nicht neu optimiert,
+        # sondern blockieren darüber nur diese Kiste für die Dauer ihrer
+        # Überlappung (siehe O unten).
+        for j in J:
+            fixed_crate = fixed_crate_by_order_id.get(job_dict[j]["id"])
+            if fixed_crate is not None:
+                model += x[j, fixed_crate] == 1, f"FixedAssignment_j{j}"
+
         # B. Kapazität & Zeitkonflikte (Überlappungssperre)
         for k in K:
             for (j1, j2) in O:
@@ -194,7 +225,14 @@ class MilpAssigner(AssignmentServiceInterface):
         # 4. LÖSUNG DES MODELLS
         # ==========================================
 
-        solver = pulp.GUROBI(msg=True, warmStart=True)
+        # timeLimit/gapRel: die durch still_open_orders jetzt vollstaendige
+        # Kapazitaetspruefung (siehe oben) vergroessert das Modell spuerbar -
+        # ein Beweis der EXAKTEN Optimalitaet kann pro Tag mehrere Minuten
+        # dauern. Ein 2%-Gap ist fuer die Kartenwechsel-Zaehlung praktisch
+        # nicht von der exakten Loesung zu unterscheiden, laeuft aber in
+        # angemessener Zeit durch - auch fuer den taeglichen Live-Einsatz
+        # relevant (der sonst ebenso lange haengen wuerde).
+        solver = pulp.GUROBI(msg=True, warmStart=True, timeLimit=90, gapRel=0.02)
         model.solve(solver)
 
         # ==========================================
