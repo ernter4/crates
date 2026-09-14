@@ -29,5 +29,5 @@ dev = [
 ]
 test = [
     "pytest>=9.1.1",
-    "gurobipy>=13.0.2",
+    "gurobipy>=13.0.3",
 ]
