@@ -16,7 +16,7 @@ dependencies = [
     "pydantic[email]==2.13.4",
     "python-dotenv==1.2.3",
     "schwifty==2026.7.3",
-    "sentry-sdk==2.68.0",
+    "sentry-sdk==2.68.1",
     "sepaxml==2.7.0",
     "sqlalchemy==2.0.52",
     "sqlmodel==0.0.39",
