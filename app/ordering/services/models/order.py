@@ -1,13 +1,11 @@
 from datetime import  datetime,time, timedelta
 from typing import Generic, TypeVar, Type, Any, Optional
 
-from anyio import current_effective_deadline
 from sqlmodel import SQLModel, Session, select, and_, or_
 
 from app.ordering.models import OrderCreate, Order, OrderWithID, OrderHistory, OrderBase, WeeklyOrderCreate
 from app.shared.ModelService import ModelService, TUpdate, Tout, TCreate
 from app.shared.models import User
-from app.accounting.models import Customer
 
 
 class OrderService(ModelService[Order,OrderCreate,Order,OrderWithID]):

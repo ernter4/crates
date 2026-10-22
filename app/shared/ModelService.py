@@ -68,4 +68,6 @@ class ModelService(Generic[TDatabase, TCreate, TUpdate, Tout]):
 
         results = self.session.exec(filter_statement).all()
         return [self.out_class.model_validate(row) for row in results]
-
+    def list(self) -> list[Tout]:
+        results = self.session.exec(select(self.model_class)).all()
+        return [self.out_class.model_validate(row) for row in results]
