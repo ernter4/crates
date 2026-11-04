@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.1](https://github.com/ernter4/crates/compare/v0.15.0...v0.15.1) (2026-11-04)
+
+
+### Bug Fixes
+
+* removals ([0a27a88](https://github.com/ernter4/crates/commit/0a27a88525381f33d71db92688af37a5e852f7c9))
+
 ## [0.15.0](https://github.com/ernter4/crates/compare/v0.14.3...v0.15.0) (2026-11-04)
 
 
