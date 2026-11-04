@@ -1,8 +1,6 @@
 from datetime import date, datetime
 from typing import Optional, TYPE_CHECKING
 
-from pyasn1.type.univ import Boolean
-
 from sqlmodel import Field, Relationship, SQLModel,text
 
 from app.shared.models import CustomSQLModel, ModelWithId

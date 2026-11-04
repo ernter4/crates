@@ -8,7 +8,7 @@ from sqlmodel import SQLModel, Relationship, Field
 from app.shared.models import ModelWithId, CustomSQLModel
 
 if TYPE_CHECKING:
-    from app.accounting.models import Invoice
+
     from app.ordering.models import Order
 
 
@@ -46,7 +46,6 @@ class BaseCustomer(SQLModel, table=False):
 
 class Customer(BaseCustomer, ModelWithId, table=True):
     id: int = Field(default=None, primary_key=True)
-    invoices: list["Invoice"] = Relationship(back_populates="customer")
     customer_number: int
     orders: list["Order"] = Relationship(back_populates="customer")
 

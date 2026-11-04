@@ -2,7 +2,7 @@ import io
 from datetime import date
 from typing import Annotated
 
-from PIL import Image
+
 
 from app.ordering.services.assignment.greedy.Assigner import GreedyAssigner
 
