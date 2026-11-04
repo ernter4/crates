@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from sentry_sdk import session
+
 from sqlmodel import Session, select
 
 from app.ordering.models import CrateWithID, Crate, Order, OrderWithID
