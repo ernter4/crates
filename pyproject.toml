@@ -20,6 +20,6 @@ dev = [
     "ruff>=0.17.1",
 ]
 test = [
-    "pytest>=9.1.1",
+    "pytest>=9.2.0",
     "gurobipy>=13.0.3",
 ]
