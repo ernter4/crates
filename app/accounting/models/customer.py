@@ -23,6 +23,12 @@ class BaseCustomer(SQLModel, table=False):
     sepa_mandate_date: date | None = None
     iban: IBAN | None = None
     bic: BIC | None = None
+    schedule_monday: int =0
+    schedule_tuesday: int =0
+    schedule_wednesday: int =0
+    schedule_thursday: int =0
+    schedule_friday: int =0
+    schedule_sunday: int =0
 
     @field_validator('sepa_mandate_reference', mode='before')
     def generate_sepa_mandate_reference(cls, v, info):
@@ -49,11 +55,15 @@ class Customer(BaseCustomer, ModelWithId, table=True):
     customer_number: int
     orders: list["Order"] = Relationship(back_populates="customer")
 
-
 class CustomerCreate(BaseCustomer):
     customer_number: Optional[int] = None
     sepa_mandate: bool | None = False
-
+    schedule_monday : Optional[int] = 0
+    schedule_tuesday : Optional[int] = 0
+    schedule_wednesday : Optional[int] = 0
+    schedule_thursday : Optional[int] = 0
+    schedule_friday : Optional[int] = 0
+    schedule_sunday : Optional[int] = 0
 
 class CustomerWithID(BaseCustomer,ModelWithId):
     id:int
@@ -63,19 +73,7 @@ class CustomerWithID(BaseCustomer,ModelWithId):
 
 class CustomerFilter(CustomSQLModel):
     customer_number: Optional[int] = None
-    email: Optional[EmailStr] = None
-    display_text: Optional[str] = None
-    sepa_mandate: Optional[bool] = None
+    name : Optional[str] = None
 
-
-def get_customer_filter_query(
-        customer_number: Optional[int] = None,
-        email: Optional[EmailStr] = None,
-        display_text: Optional[str] = None,
-        sepa_mandate: Optional[bool] = None,
-) -> CustomerFilter:
-    return CustomerFilter(
-        customer_number=customer_number,
-        email=email,
-        display_text=display_text,
-        sepa_mandate = sepa_mandate)
+def get_customer_filter_query(customer_number: Optional[int] = None, name: Optional[str] = None) -> CustomerFilter:
+    return CustomerFilter(customer_number=customer_number,name=name)

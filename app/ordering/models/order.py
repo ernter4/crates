@@ -93,14 +93,12 @@ class Assignment(SQLModel):
     card_swap:bool
     card_turn:bool
 
+
+class WeeklyOrder(SQLModel):
+    weekday: int
+    menu_type_id : int
 class WeeklyOrderCreate(SQLModel):
     customer_id: int
     date: date
 
-    monday: list[int] = Field(default_factory=list)
-    tuesday: list[int] = Field(default_factory=list)
-    wednesday: list[int] = Field(default_factory=list)
-    thursday: list[int] = Field(default_factory=list)
-    friday: list[int] = Field(default_factory=list)
-    saturday: list[int] = Field(default_factory=list)
-    sunday: list[int] = Field(default_factory=list)
+    orders: list[WeeklyOrder] = Field(default_factory=list)

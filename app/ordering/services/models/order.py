@@ -45,7 +45,7 @@ class OrderService(ModelService[Order,OrderCreate,Order,OrderWithID]):
     def check_for_overlap(self, current_order:Order):
 
         ## without crate there is no overlap
-        if current_order.crate is None:
+        if current_order.crate_id is None:
             return
         statement = select(Order).where(Order.crate_id == current_order.crate_id).where( Order.id != current_order.id).where(Order.deleted == False)
         overlap :list[Order]= []
@@ -54,15 +54,15 @@ class OrderService(ModelService[Order,OrderCreate,Order,OrderWithID]):
             if bad_order:
                 overlap.append(bad_order)
         else:
-            values = self.session.exec(
+            bad_orders = self.session.exec(
                 statement.where(
                     or_(
-                        # Erster Block: current_order.delivery_date >= Order.delivery_date AND Order.delivery_date < Order.return_date
+                        # Check if delivery date is in range of search order
                         and_(
                             current_order.delivery_date <= Order.delivery_date,
                             Order.delivery_date < current_order.return_date.date()
                         ),
-                        # Zweiter Block: current_order.delivery_date > Order.return_date AND Order.return_date <= current_order.return_date
+                         # Check if return date is in range of search order
                         and_(
                             datetime.combine(current_order.delivery_date,time(23,59)) < Order.return_date,
                             Order.return_date < current_order.return_date
@@ -70,8 +70,8 @@ class OrderService(ModelService[Order,OrderCreate,Order,OrderWithID]):
                     )
                 )
             )
-            for value in values:
-                overlap.append(value)
+            for bad_order in bad_orders:
+                overlap.append(bad_order)
 
         if len(overlap)>0:
             error_message = " Überschneidung mit folgenden Bestellungen:"
