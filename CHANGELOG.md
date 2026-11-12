@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.16.0](https://github.com/ernter4/crates/compare/v0.15.2...v0.16.0) (2026-11-12)
+
+
+### Features
+
+* Added schedule to customer ([1b41c8f](https://github.com/ernter4/crates/commit/1b41c8f9423ea9e0ddb66f719f0fbd8381f37dab))
+
 ## [0.15.2](https://github.com/ernter4/crates/compare/v0.15.1...v0.15.2) (2026-11-04)
 
 
