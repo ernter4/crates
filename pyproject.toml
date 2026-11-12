@@ -12,7 +12,7 @@ dependencies = [
     "schwifty==2026.7.3",
     "sqlalchemy==2.0.52",
     "sqlmodel==0.0.42",
-    "uvicorn==0.52.4",
+    "uvicorn==0.54.0",
 ]
 
 [dependency-groups]
