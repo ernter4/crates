@@ -1,6 +1,7 @@
 from datetime import  datetime,time, timedelta
 from typing import Generic, TypeVar, Type, Any, Optional
 
+from rich_toolkit import menu
 from sqlmodel import SQLModel, Session, select, and_, or_
 
 from app.ordering.models import OrderCreate, Order, OrderWithID, OrderHistory, OrderBase, WeeklyOrderCreate
@@ -23,22 +24,25 @@ class OrderService(ModelService[Order,OrderCreate,Order,OrderWithID]):
     def create_weekly(self, data: WeeklyOrderCreate) -> list[OrderWithID]:
         if data.date.weekday() != 0:
             raise ValueError("date muss ein Montag sein.")
+        date = data.date
+        return_orders:list[OrderWithID] = []
+        for new_order in data.orders:
+            dborder = Order(customer_id=data.customer_id,
+                            delivery_date=date+ timedelta(days=new_order.weekday),
+                            menu_id=new_order.menu_type_id
+                            )
+            self.check_for_overlap(dborder)
+            self.session.add(dborder)
+            self.session.commit()
+            self.session.refresh(dborder)
+            return_orders.append(OrderWithID.model_validate(dborder))
+        return return_orders
 
-        menu_ids_by_offset = [data.monday, data.tuesday, data.wednesday, data.thursday, data.friday,data.saturday,data.sunday
-                              ]
 
-        created: list[OrderWithID] = []
-        for offset, menu_ids in enumerate(menu_ids_by_offset):
-            delivery_date = data.date + timedelta(days=offset)
-            for menu_id in menu_ids:
-                order = OrderCreate(
-                    customer_id=data.customer_id,
-                    delivery_date=delivery_date,
-                    menu_id=menu_id,
-                    crate_id=None,
-                )
-                created.append(self.create(order))
-        return created
+
+
+
+
 
 
 
