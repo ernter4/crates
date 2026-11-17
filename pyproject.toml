@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "alembic==1.20.1",
-    "fastapi[standard]==0.141.1",
+    "fastapi[standard]==0.163.0",
     "pydantic[email]==2.14.3",
     "python-dotenv==1.2.4",
     "schwifty==2026.7.3",
